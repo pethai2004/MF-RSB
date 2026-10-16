@@ -1,0 +1,207 @@
+\documentclass[10pt,a4paper]{article}
+
+\usepackage[margin=1.5cm]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{mathtools}
+\usepackage{graphicx}
+\usepackage{enumitem}
+\usepackage{parskip}
+\usepackage{mathrsfs}
+\usepackage{siunitx}
+
+\usepackage[numbers,sort&compress]{natbib}
+% No paragraph indentation
+\setlength{\parindent}{0pt}
+
+% No page numbers
+\pagestyle{empty}
+
+\begin{document}
+
+\section{Abstract}
+
+Classical \textit{Schrödinger Bridge} (SB) problem seeks a path measure that minimally deviates from a given reference measure subject to prescribed initial and terminal marginals. This works investigate numerical approach to dynamic of interacting brownian particle with normal reflection term in low-dimensional setting ($\displaystyle d\leqslant 3$) on bounded domain $\displaystyle \mathcal{D} \subset \mathbb{R}^{d}$. To alleviate the difficulty due to nonlinearity incurred by non-local coupling, a nested fixed-point is adopted with Sinkhorn-type iterates. Further, fully semi-lagrangian discretization is used to propagate the solution of forward-backward partial differential equations (FB-PDEs).
+
+\section{Introduction}
+
+
+
+\section{Related Works}
+
+Interest in spatially-constrained SB is largely under-developed, especially when also incorporating mean-field framework. This work is inspired by \cite{Caluya2020ReflectedBridge, Eldesoukey2026MeanFieldSinkhorn}. First paper studies SB with reflected dynamic with Sinkhorn iterate where the time marching solution involve Neuman and Rudin boundary conditions, and show great performance in low-dimension. The latter generalized standard Sinkhorn to accept partial-integro-PDEs associated with mean-field SB resulting in nested version. Along this line \cite{Adu2026ReflectedSchrodinger} studies degenerate, sub-Riemannian dynamics, and use Sinkhorn simiarl to the former. Recent work \cite{LiuKalise2026} use Finite element discretization to solve the weak form of coupled PDEs for reflected SB. \cite{Deng2024ReflectedGenerative} derives forward-backward SDEs associated coupled FB-PDEs of reflected SB and extend divergence-based likelihood training in smooth bounded domain and shown to scale in high-dimension. Discrete-time framework also been explored with chance-constrants \cite{Rapakoulias2023DiscreteCovariance, Rapakoulias2025MeanFieldGMM} with mixture of Guassian marginal contraints. Alternative method such as introducing direct soft-penalty for particle escaping region exists as demonstrated in \cite{Liu2022DeepGSB} using FB-SDE representation. There is a direct link between system of optimality of SB and MFG, therefore one can naturally adopt a scheme in MFG such as finite-difference to solve SB problem. \cite{CalzolaCarliniDupuisSilva2023, CarliniCoscetti2026, CarliniSilva2013} adopt a semi-lagrangian approach. 
+
+\section{Formulation}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\section{Numerical Scheme}
+
+
+
+
+
+% \section{Problem Formulate}
+% Let $\displaystyle \mathcal{D} \subset \mathbb{R}^{d}$ and boundary $\displaystyle \partial \mathcal{D}$, represented by smooth level-set $\displaystyle \chi ( t,x)$ via $\displaystyle \mathcal{\chi } < 0$ on $\displaystyle \mathcal{D}$ and $\displaystyle \chi =0$ on $\displaystyle \partial \mathcal{D}$. Assuming $\displaystyle \nabla \chi \neq 0$ on $\displaystyle \partial \mathcal{D}$, the outward unit normal $\displaystyle \mathbf{n}( t,x)$ is $\displaystyle \mathbf{n} =\nabla \chi /\Vert \nabla \chi \Vert $. Denote by $\mathscr{P} (\mathcal{S} )$ the space of probability measures on $\mathcal{S}$ endowed with the $2$-Wasserstein metric $W_{2} (\cdot ,\cdot )$ and having finite 2nd-moment. Let $\displaystyle \si{\ohm}_{X} \coloneq \mathcal{C} (\mathcal{T} ;\mathbb{R}^{d} )$, $\displaystyle \mathcal{T} \coloneq [ 0,T]$ be canonical path space. Let $\displaystyle \mathbb{P}_{t} \in \mathscr{P} (\mathbb{R}^{d} )$ be $\displaystyle t$-time pushforward marginal of path measure $\displaystyle \mathbb{P} \in \mathscr{P} (\Omega _{X} )$. For given fixed $\displaystyle \mathbb{P}$ and $\displaystyle \mu _{\text{init}} \in \mathscr{P} (\mathbb{R}^{d} )$, consider the dynamic of weakly-interacting brownian particle modeled by Mckean-Vlaskov reflected SDEs: \ 
+% \begin{equation}
+%  \begin{aligned}
+% dX_{t} =-{\textstyle ( \nabla E\star \mathbb{P}}_{t})( X_{t}) +\sigma \ dW_{t} -\mathbf{n}_{t} dV_{t} & &  & & ,X_{0} \sim \mu _{\text{init}}
+% \end{aligned}
+% \end{equation}which induces the path law $\displaystyle \Gamma (\mathbb{P}) \coloneq \text{Law}\left(( X_{t})_{t\in \mathcal{T}}\right)$, $\displaystyle W$ is $\displaystyle \mathbb{R}^{d}$-valued Wiener on $\displaystyle (\si{\ohm},\mathcal{F} ,\mathbb{F} =(\mathcal{F}_{t} )_{t\in \mathcal{T}} ,\mathbb{P}_{0} )$ Here $\displaystyle E$ is potential, $\displaystyle {\textstyle ( \nabla E\star \mu )( \cdot ) \coloneq \int _{\mathbb{R}^{d}} \nabla E(\cdot -y)\ \mu (dy).}$ And $V$ is a continuous, non-decreasing, $\displaystyle \mathbb{F}$-adapted bounded-variation process satisfying $\displaystyle {\textstyle V_{0} =0}$, $\displaystyle {\textstyle \int _{0}^{T}\mathbf{1}_{\{X_{s} \notin \partial \mathcal{D}_{s} \}} \ dV_{s} =0}$, and $\displaystyle {\textstyle V_{t} =\int _{0}^{t}\mathbf{1}_{\{X_{s} \in \partial \mathcal{D}_{s} \}} \ dV_{s}}$. For simplicity takes diffusion be $\displaystyle \sigma \equiv \sqrt{2\kappa }\mathbb{I}_{d}$ for $\displaystyle \kappa _{0}  >0$. In \cite{Backhoff2020MeanFieldErgodic} shows that the rate function governing the large deviations for mean-field type dynamic in (1) is $H(\mathbb{P} \parallel \Gamma (\mathbb{P} ))$. Unlike standard non-mean-field SB in that the referenc measure is no longer fixed and the convexity property is losed due to nonlinear dependency in its arguments of relative entropy \cite{Eldesoukey2026MeanFieldSinkhorn}. Under appropriate hypotheses, the existence of $\displaystyle \mathbb{F}$-progressively measurable $\displaystyle \alpha ( t,x)$ is guaranteed by Girsanov's, the relative entropy can be parametrized by process $\displaystyle \alpha $:
+% \begin{equation}
+% {\textstyle H\bigl(\mathbb{P} \parallel \Gamma (\mathbb{P} )\bigr) =\frac{1}{2}\mathbb{E}^{\mathbb{P}}\left[\int _{0}^{T} \| \alpha (t,X_{s} )\| ^{2} \ ds\right]}
+% \end{equation}
+% and that $\displaystyle X_{t}$ follows the controlled Mckean Vlasov SDE:
+% \begin{equation}
+% dX_{t} =b^{\alpha } (t,X_{t} ,\mathbb{P}_{t} )\ dt+\sigma _{t} \ dW_{t}^{\mathbb{P}} -\mathbf{n}_{t} dV_{t} ,\ \ X_{0} \sim \mu _{\text{init}} ,
+% \end{equation}where $W^{\mathbb{P}}$ is a standard $(\mathbb{P} ,\mathcal{F}_{t} )$-Brownian, $\displaystyle b^{\alpha } (t,x,\mu )\coloneq \sigma _{t} \alpha _{t} -{\displaystyle \nabla E\star \mu }$. Further, under additional hypothesis, the perturbation is markovian feedback control. i.e. there exists $\displaystyle \Phi _{t} \in H_{-1}( \rho _{t} :t\in \mathcal{T})$ such that $\displaystyle \alpha _{t} =\Phi _{t}( X_{t})$, $\displaystyle dt\times d\mathbb{P}$ a.s. (here assuming the control dimension is similar to state dimension). Following \cite{Chen2021SinkhornReview}, using transformed control \ $\displaystyle m:=\rho \alpha \in \mathbb{R}^{d}$, rewrite (2) as SOC problem
+% \begin{equation}
+% \mathcal{J}_{\text{rmf-sb}}^{*} =\inf_{(\alpha ,\rho )}\mathcal{J}_{\text{rmf-sb}} (m,\rho ) ,\ \text{where} \ \mathcal{J}_{\text{rmf-sb}}( m,\rho ) \coloneq {\textstyle \frac{1}{2}\int _{0}^{T}\int _{\mathbb{R}^{d}} \| m_{t} \| ^{2} /\rho _{t} dx\ dt.}
+% \end{equation}The law of sample path $\displaystyle ( X_{t})_{t\in \mathcal{T}}$ in (3) can be characterized as solving the martingale problem, i.e. under suitable assumption, for any $\displaystyle \psi \in \mathcal{C}^{2}(\mathcal{D})$, the process 
+% \begin{equation}
+% {\textstyle M_{t} \coloneq \psi ( X_{t}) -\psi ( X_{0}) -\int _{0}^{t}\mathcal{G}[ \rho _{s}] \psi ( X_{s}) ds}
+% \end{equation}is $\displaystyle \mathbb{P}$-local martingale with respect to $\displaystyle \mathbb{F}$ where $\displaystyle \mathcal{G}$ is generator for (3) defined by $\displaystyle \mathcal{G}[ \rho ] \coloneq \kappa \nabla \rho +\nabla \rho \cdot ( \sigma \alpha -E\star \rho )$. It follows that \cite{Backhoff2020MeanFieldErgodic}, the marginal flows $\displaystyle ( \rho _{t})_{t\in \mathcal{T}}$ is a weak solution of forward Kolmogorov equation:
+% \begin{equation}
+% \begin{aligned}
+% \partial _{t} \rho +\nabla \cdot J =0 & ,\ ( t,x) \in \mathcal{D} ,\\
+% J\cdot \mathbf{n} =0 & ,\ ( t,x) \in \partial \mathcal{D}
+% \end{aligned}
+% \end{equation}
+% where probability flux is $\displaystyle J( m,\alpha ) =\sqrt{2\kappa } m-\rho \nabla E\star \rho -\kappa \nabla \rho $, where here using $\displaystyle m\coloneq \rho \alpha $. One can now characterize the 1st-order optimality condition associated with (4) with contraint (6) which yields a system of forward-backward PDEs. Here the system is adjacent to that appear in \cite{Eldesoukey2026MeanFieldSinkhorn, Backhoff2020MeanFieldErgodic}, supplemented with additional Neuman and Robin boundary conditions. The proof given here is straightforward application of Lagrange mulitplier on Banach space. 
+
+% \newtheorem{proposition}{Proposition}
+
+% \begin{undefined}
+% \end{undefined}
+
+% \subsection{\textbf{Assumptions}}
+% \begin{itemize}
+% \item Interacting term $\displaystyle E\in \mathcal{C}^{2}\left(\mathbb{R}^{d} ;\mathbb{R}\right)$ is symmetric, i.e. $\displaystyle E( \cdot ) =E( -\cdot )$ with $\displaystyle \sup _{z,v\in \mathbb{R}^{d}} v^{\top } \nabla ^{2} E( z) v< +\infty $. 
+% \item The admissible control $\displaystyle \Theta _{\alpha } =L_{\rho }^{2}$. And $\displaystyle \Theta _{\rho }$ be such that $\displaystyle \rho \in L^{2}\left( 0,T;H^{1}\right) \cap \mathcal{C}\left(\mathcal{T} ;L^{2}\right)$ with $\displaystyle \rho \geqslant 0$, $\displaystyle {\textstyle \int _{\mathcal{D}} \rho =1}$, $\displaystyle \rho ( 0,\cdot ) dx=\mu _{\text{init}}$, $\displaystyle \rho ( T,\cdot ) dx=\mu _{\text{targ}}$. And $\displaystyle \Theta _{m} =L^{2}\left( 0,T;L^{2}\right)$.
+% \end{itemize}
+
+
+% \begin{proposition}
+% There is at least optimal pair $\displaystyle \left( \alpha ^{*} ,\rho ^{*}\right) \in \Theta _{\alpha } \times \Theta _{\rho }$, then it must be the weak solution of the following FB-PDEs: 
+% \begin{equation}
+% \begin{cases}
+% {\displaystyle \partial _{t} \rho -\kappa \Delta \rho +\nabla \cdot \left[ -\rho ( \nabla E\star \rho +2\kappa \nabla \phi )\right] =0} & ,( t,x) \in ( 0,T) \times \mathcal{D} ,\\
+% {\displaystyle \partial _{t} \phi +\kappa \Delta \phi -\kappa }\Vert \nabla \phi \Vert ^{2} -{\textstyle \mathcal{K} [\rho ,\phi ]=0} & ,( t,x) \in ( 0,T) \times \mathcal{D} ,\\
+% {\displaystyle ( -\rho (\nabla E\star \rho +2\kappa \nabla \phi ) -\kappa \nabla \rho ) \cdot \mathbf{n} =0\ \ \ \ \ \ } & {\displaystyle ,( t,x) \in (0,T)\times \partial \mathcal{D} ,}\\
+% {\displaystyle \nabla \phi \cdot \mathbf{n} =0} & {\displaystyle ,( t,x) \in (0,T)\times \partial \mathcal{D} ,}\\
+% {\displaystyle \rho (0,\cdot )dx=\mu _{\mathrm{init}} ,\ \rho (T,\cdot )dx=\mu _{\mathrm{targ}}} & 
+% \end{cases}
+% \end{equation}
+% where the nonlocal term $\displaystyle {\textstyle \mathcal{K} [\rho ,\phi ]( \cdot ) \coloneq \int _{\mathbb{R}^{d}} \nabla E(\cdot -y)\cdot [ \nabla \phi (\cdot )-\nabla \phi (y)] \rho (dy).}$ Furthermore, the optimal policy is given by $\displaystyle \alpha ^{*} =-\sqrt{2\kappa } \nabla \phi ^{*}$.
+% \end{proposition}
+
+
+% \textit{proof}. 
+
+% Let $\displaystyle \mathcal{Y} \coloneq L^{2}\left( 0,T;H^{-1}(\mathcal{D})\right)$, contraint map $\displaystyle q( m,\rho ) \coloneq \partial _{t} \rho +\nabla \cdot J$, and assume $\displaystyle ( m,\rho ) \in \Theta _{m} \times \Theta _{\rho }$ then $\displaystyle \mathcal{J}_{\text{rmf-sb}}$ and $\displaystyle q$ is continuously Fréchet differentiable on open neighborhood at $\displaystyle \left( m^{*} ,\rho ^{*}\right)$. Assuming $\displaystyle \text{Im} \ q^{\prime }\left( m^{*} ,\rho ^{*}\right) =Y$, then by lagrange multiplier theorem, for all variation $\displaystyle h\in \Theta _{m} \times \Theta _{\rho }$
+% \begin{equation}
+% \exists !\lambda \in Y\prime \ :\ D\mathcal{J}_{\text{rmf-sb}}\left( m^{*} ,\rho ^{*}\right)[ h] +\left< \lambda ,DQ\left( m^{*} ,\rho ^{*}\right)[ h]\right> _{\mathcal{Y}^{*} ,\mathcal{Y}} =0
+% \end{equation}
+% Pairing $\displaystyle \mathcal{\lambda }$ with the adjoint $\displaystyle \phi ( t,x)$, the dual problem is therefore represented by augmented functional
+% \begin{equation}
+% {\textstyle \mathcal{L} =\int _{0}^{T}\int _{\mathcal{D}}\frac{\Vert m\Vert ^{2}}{2\rho } \ dxdt+\int _{0}^{T}\int _{\mathcal{D}} \phi ( \partial _{t} \rho +\nabla \cdot J) \ dxdt}
+% \end{equation}where Fokker-Planck is interpreted in a weak sense, i.e. for any test function $\displaystyle \phi \in H^{1}\left( 0;T;H^{1}\right)$
+% \begin{equation}
+% {\textstyle \ \int _{0}^{T}\int _{\mathcal{D}} \rho \partial _{t} \phi +J( \rho ,m) \cdot \nabla \psi \ dxdt=\int _{\mathcal{D}} \rho ( T,x) \psi ( T,x) dx-\int _{\mathcal{D}} \rho ( T,0) \psi ( T,0) dx}
+% \end{equation}
+% By first-order optimality condition, the variation vanishes for any direction $\displaystyle h_{m} \in \Theta _{m}$ and $\displaystyle h_{\rho } \in \Theta _{\rho }$:
+% \begin{equation}
+%  \begin{aligned}
+% \delta _{m}\mathcal{L} |_{\left( m^{*} ,\rho ^{*}\right)}[ h_{m}] =0, & & \text{and} \  & & \delta _{\rho }\mathcal{L}_{\left( m^{*} ,\rho ^{*}\right)}[ h_{\rho }] =0
+% \end{aligned}
+% \end{equation}where 
+% \begin{equation}
+% {\textstyle \delta _{m}\mathcal{L} =\ \int _{0}^{T}\int _{\mathcal{D}}\left(\frac{m^{*}}{\rho ^{*}} -\sqrt{2\kappa } \nabla \phi ^{*}\right) \cdot h_{m} dxdt=0\Longrightarrow m^{*} =\sqrt{2\kappa } \rho ^{*} \nabla \phi ^{*}}
+% \end{equation}with zero-flux at $\displaystyle \partial \mathcal{D}$ condition $\displaystyle J^{*} \cdot \mathbf{n} =0$ and that 
+% \begin{equation}
+% {\textstyle \delta _{\rho }\mathcal{L} =\int _{0}^{T}\int _{\mathcal{D}} h_{\rho }\left( -\kappa |\nabla \phi ^{*} |^{2} -\partial _{t} \phi ^{*} +(\nabla E\star \rho ^{*} )\cdot \nabla \phi ^{*}\right) dxdt+\int _{0}^{T}\int _{\mathcal{D}}\left( \kappa \nabla h_{\rho } \cdot \nabla \phi ^{*} +h_{\rho }\mathcal{K} [\rho ^{*} ,\phi ^{*} ]\right) \ dxdt=0}
+% \end{equation}Integrate by part the term 
+% \begin{equation}
+% {\textstyle \kappa \int _{0}^{T}\int _{\mathcal{D}} \nabla h_{\rho } \cdot \nabla \phi ^{*} \ dxdt=-\kappa \int _{\mathcal{D}} h_{\rho } \Delta \phi dx+\kappa \int _{\partial \mathcal{D}} h_{\rho }( \nabla \phi \cdot \mathbf{n}) dS}
+% \end{equation}Since $\displaystyle E$ is symmetric, then for all direction $\displaystyle h_{\rho }$ one obtain HJB-PDEs with boundary condition $\displaystyle \nabla \phi \cdot \mathcal{n} =0$ on $\displaystyle \partial \mathcal{D}$.
+
+% Apply the Hope-Cole transform as in \cite{Eldesoukey2026MeanFieldSinkhorn} defined by $\displaystyle ( \phi ,\rho )\rightarrow ( \varphi ,\hat{\varphi }) \coloneq ( e^{-\phi } ,\rho \exp( E\star \rho /\kappa +\phi )$. The transformed FB-PDEs in (7) yields nonlinear advection-diffusion-reaction PDEs:
+% \begin{equation}
+% \begin{aligned}
+% \partial _{t}\begin{pmatrix}
+% \varphi \\
+% \hat{\varphi }
+% \end{pmatrix} =\begin{pmatrix}
+% \mathcal{A}^{\rho }[ \varphi ] +\mathcal{R}^{\rho }[ \varphi ]\\
+% -\mathcal{A}^{\rho }[\hat{\varphi }] -\mathcal{R}^{\rho }[\hat{\varphi }]
+% \end{pmatrix} \  & \text{on} \ {\displaystyle (0,T)\times \mathcal{D}} \  & \text{such that} \  & \begin{cases}
+% \nabla \varphi \cdot \mathbf{n} =\nabla \hat{\varphi } \cdot \mathbf{n} =0\\
+% \mu _{\text{init}} =\exp( -E\star \rho /\kappa ) \varphi _{0}\hat{\varphi }_{0}\\
+% \mu _{\text{targ}} =\exp( -E\star \rho /\kappa ) \varphi _{T}\hat{\varphi }_{T}
+% \end{cases} & \text{on} \ {\displaystyle (0,T)\times \partial \mathcal{D}}
+% \end{aligned} \tag{PDEs-opt}
+% \end{equation}
+% where $\displaystyle \mathcal{A}[ \phi ] \coloneq ( \nabla E\star \rho ) \cdot \nabla \phi -\kappa \Delta \phi $, and $\displaystyle {\textstyle \mathcal{R}[ \eta ,\rho ] \coloneq -\nabla E\star ( \rho \cdot \nabla \log \eta )}$ is nonlocal source term. As in \cite{Eldesoukey2026MeanFieldSinkhorn}, when $\displaystyle \rho $ is fixed, the system (15) reduces to linear advection-diffusion which further simplify the discretization. This type of PDE has been explored withthe use of semi-lagragian in \cite{Bonaventura2021}, atleast when view $\displaystyle \rho $ as fixed. This perpsective view be adopted in the nested fixed-point scheme where one first fix the convolution and source term. For the rest of this report will concentrate on solving (15).
+
+% \section{Scheme}
+
+% Let termporal grid be $\displaystyle G_{\Delta t} \coloneq \{t_{j} =j\Delta t,j=I_{\Delta t}\}$ where $\displaystyle I_{\Delta t} \coloneq \{1,...,N_{T}\}$, $\displaystyle \Delta t=t_{j+1} -t_{j}$. Fix $\displaystyle \rho $ and reaction $\displaystyle \mathcal{R}^{\rho }[ \eta ] =\mathcal{R}( t,x)$ to align with nested fixed-point scheme, so (PDEs-opt) is pure linear parabolic. By standard parabolic theory and assumption [...], for forward equation, it follows that on $\displaystyle [ 0,T]$ the operator $\displaystyle \mathcal{A} +\mathcal{R}$ generates $\displaystyle \mathcal{C}^{0}$-semigroup on Banach space $\displaystyle {\textstyle \mathrm{dom}(\mathcal{A} +\mathcal{R}) =\left\{\eta \in \mathcal{C}^{2}(\mathcal{D}) :\nabla \eta \cdot \mathbf{n}\middle| _{\partial \mathcal{D}} =0\right\}}$ given by $\displaystyle {\textstyle \left( P_{s,t} =e^{( t-s)(\mathcal{A} +\mathcal{R})} :0\leqslant s\leqslant t\leqslant T\right)}$. The solution to forward equation in (PDEs-opt) with $\displaystyle \varphi ( 0,\cdot ) =\varphi _{0}( \cdot )$ at $\displaystyle t_{j}$ is given by 
+% \begin{equation}
+% \varphi ( t_{j} ,\cdot ) =P_{0,t_{j}} \varphi ( 0,\cdot ) ={\textstyle \lim _{N\rightarrow \infty }\left( e^{\Delta t\mathcal{R} /2} \ e^{\Delta t\mathcal{A}} e^{\Delta t\mathcal{R} /2}\right)^{N}} \varphi ( 0,\cdot )
+% \end{equation}
+% where RHS. obtained from symmetrized Strang Splitting to fractional substep with $\displaystyle \Delta t=t_{j} /N$. This is in comparison to Lie-Trotter scheme which is only first order, see also for other operator splitting scheme \cite{Blanes2024Splitting}. The probabilistic representation for $\displaystyle e^{\Delta t\mathcal{A}}$ on $\displaystyle \eta \in \mathcal{C}^{2}\left(\mathcal{T} \times \mathbb{R}^{d} ;\mathbb{R}\right)$ takes the form
+% \begin{equation}
+% {\textstyle \mathcal{S}_{1/2}^{\Delta t} \coloneq e^{\Delta t\mathcal{A}}[ \eta ]( t,a) =\mathbb{E}^{\mathbb{P}}\left[ \eta ( \Delta t,X_{\Delta t})\middle| X_{0} =a\right] =\lim _{K\rightarrow \infty }\frac{1}{K}\sum _{m} w_{m} \eta ( X_{\Delta t})}
+% \end{equation}where $\displaystyle X_{s}$ be a solution to reference reflected-SDE in (1) for fixed $\displaystyle \rho $, and appropriate weight positive, normalized $\displaystyle w_{m}$. Define the one fraction step by \begin{equation}
+% \mathcal{S}^{\Delta t,\pm }[ \eta ]( t,\cdot ) \coloneq e^{\Delta t\mathcal{R}( t,\cdot ) /2}{\textstyle \mathcal{S}_{1/2}^{\Delta t,\pm }} e^{\Delta t\mathcal{R}( t,\cdot ) /2}
+% \end{equation}
+% \begin{proposition}
+% Equip $\displaystyle {\textstyle \mathrm{dom}(\mathcal{A} +\mathcal{R})}$ with sup-norm $\displaystyle \Vert \cdot \Vert _{\infty }$. Suppose the assumption (A1-A3) holds, it follows that there exist $\displaystyle C_{1} ,C_{2} \geqslant 0$ such that 
+% \begin{equation}
+% \left\Vert \mathcal{S}^{\Delta t}[ \eta ] -e^{\Delta t(\mathcal{A} +\mathcal{R})} \eta \right\Vert _{\infty } \leqslant C_{1} \ something\ C_{2} \ something
+% \end{equation}
+% Furthermore, $\displaystyle \left\Vert \left(\mathcal{S}^{\Delta t}[ \eta ]\right)^{\otimes N} -e^{T(\mathcal{A} +\mathcal{R})} \eta \right\Vert _{\infty }\rightarrow 0$ as $\displaystyle N\rightarrow \infty $.
+% \end{proposition}
+% \begin{proposition}
+% Define the positive Sinkhorn operators $\displaystyle \hat{\varphi }_{0}\leftarrow \mathcal{M}_{0}[ \varphi _{0}]$ and $\displaystyle \varphi _{T}\leftarrow \mathcal{M}_{1}[\hat{\varphi }_{T}]$, and for positive integer $\displaystyle N,M >0$ define $\displaystyle \mathcal{Q}$ acting on positive function $\displaystyle \eta \in \mathcal{C}^{2}$ by
+% \begin{equation}
+% \mathcal{Q} \coloneq \mathcal{M}_{1} \circ \left(\mathcal{S}^{\Delta t}\right)_{\text{back}}^{\otimes N} \circ \mathcal{M}_{0} \circ \left(\mathcal{S}^{\Delta t}\right)_{\text{fwd}}^{\otimes M} .
+% \end{equation}
+% It follows that as $\displaystyle N,M\rightarrow \infty $, there exists unique fixed-point $\displaystyle \eta ^{*}$ on $\displaystyle \mathrm{dom}(\mathcal{A} +\mathcal{R})$ such that $\displaystyle \eta ^{*}$ is a (weak) solution of (PDEs-opt) satisfying marginal constrained. In other word, $\displaystyle \eta ^{*}$ define the optimal Mckean-Vlasov Bridge. 
+% \begin{equation}
+% \end{equation}
+
+
+% \end{proposition}
+
+
+
+
+% --- BIBLIOGRAPHY SECTION ---
+\bibliographystyle{plainnat} % Choose your style (e.g., plainnat, unsrtnat, abbrvnat)
+\bibliography{references}    % Points to your references.bib file
+
+\end{document}
