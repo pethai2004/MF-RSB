@@ -1,0 +1,51 @@
+This is BibTeX, Version 0.99d (TeX Live 2025)
+Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
+The top-level auxiliary file: main.aux
+The style file: plainnat.bst
+Database file #1: references.bib
+Warning--empty publisher in Adu2026ReflectedSchrodinger
+Warning--empty publisher in Deng2024ReflectedGenerative
+Warning--empty publisher in Liu2022DeepGSB
+Warning--empty publisher in Rapakoulias2023DiscreteCovariance
+You've used 11 entries,
+            2773 wiz_defined-function locations,
+            657 strings with 7203 characters,
+and the built_in function-call counts, 5060 in all, are:
+= -- 433
+> -- 292
+< -- 9
++ -- 98
+- -- 87
+* -- 378
+:= -- 764
+add.period$ -- 34
+call.type$ -- 11
+change.case$ -- 58
+chr.to.int$ -- 11
+cite$ -- 26
+duplicate$ -- 253
+empty$ -- 424
+format.name$ -- 110
+if$ -- 1071
+int.to.chr$ -- 1
+int.to.str$ -- 1
+missing$ -- 15
+newline$ -- 63
+num.names$ -- 44
+pop$ -- 147
+preamble$ -- 1
+purify$ -- 51
+quote$ -- 0
+skip$ -- 200
+stack$ -- 0
+substring$ -- 152
+swap$ -- 36
+text.length$ -- 2
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 101
+warning$ -- 4
+while$ -- 43
+width$ -- 0
+write$ -- 140
+(There were 4 warnings)

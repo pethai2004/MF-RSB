@@ -1,0 +1,81 @@
+\begin{thebibliography}{11}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Adu(2026)]{Adu2026ReflectedSchrodinger}
+Daniel~Owusu Adu.
+\newblock \emph{Reflected {Schrodinger} {Bridge} {Problem} over
+  {Sub}-{Riemannian} {Manifold}}.
+\newblock 2026.
+
+\bibitem[Caluya and Halder(2020)]{Caluya2020ReflectedBridge}
+Kenneth~F. Caluya and Abhishek Halder.
+\newblock Reflected {Schr}{\" o}dinger {Bridge}: Density {Control} with {Path}
+  {Constraints}.
+\newblock In \emph{American {Control} {Conference}}, 2020.
+
+\bibitem[Calzola et~al.(2023)Calzola, Carlini, Dupuis, and
+  Silva]{CalzolaCarliniDupuisSilva2023}
+Elisa Calzola, Elisabetta Carlini, Xavier Dupuis, and Francisco~J. Silva.
+\newblock A semi-{Lagrangian} scheme for {Hamilton}-{Jacobi}-{Bellman}
+  equations with oblique derivatives boundary conditions.
+\newblock \emph{Numerische Mathematik}, 153\penalty0 (1):\penalty0 49--84,
+  2023.
+
+\bibitem[Carlini and Coscetti(2026)]{CarliniCoscetti2026}
+Elisabetta Carlini and Valentina Coscetti.
+\newblock A semi-{Lagrangian} scheme for first-order mean field games based on
+  monotone operators.
+\newblock \emph{IMA Journal of Numerical Analysis}, 2026.
+
+\bibitem[Carlini and Silva(2013)]{CarliniSilva2013}
+Elisabetta Carlini and Francisco~J. Silva.
+\newblock Semi-{Lagrangian} schemes for mean field game models.
+\newblock In \emph{2013 {IEEE} 52nd {Annual} {Conference} on {Decision} and
+  {Control} ({CDC})}, pages 3115--3120, 2013.
+
+\bibitem[Deng et~al.(2024)Deng, Chen, Yang, Du, Feng, and
+  Chen]{Deng2024ReflectedGenerative}
+Wei Deng, Yu~Chen, Nicole~Tianjiao Yang, Hengrong Du, Qi~Feng, and Ricky T.~Q.
+  Chen.
+\newblock \emph{Reflected {Schr}{\" o}dinger {Bridge} for {Constrained}
+  {Generative} {Modeling}}.
+\newblock 2024.
+
+\bibitem[Eldesoukey et~al.(2026)Eldesoukey, Chen, and
+  Halder]{Eldesoukey2026MeanFieldSinkhorn}
+Asmaa Eldesoukey, Yongxin Chen, and Abhishek Halder.
+\newblock A {Generalized} {Sinkhorn} {Algorithm} for {Mean}-{Field} {Schr}{\"
+  o}dinger {Bridge}.
+\newblock \emph{IEEE Control Systems Letters}, 2026.
+
+\bibitem[Liu and {others}(2022)]{Liu2022DeepGSB}
+Guan-Horng Liu and {others}.
+\newblock \emph{Deep {Generalized} {Schr}{\" o}dinger {Bridge}}.
+\newblock 2022.
+
+\bibitem[Liu and Kalise(2026)]{LiuKalise2026}
+Wenxin Liu and Dante Kalise.
+\newblock A {PDE}-constrained {Optimization} {Approach} to {Optimal}
+  {Trajectory} {Planning} under {Uncertainty} via {Reflected} {Schr}{\"
+  o}dinger {Bridges}.
+\newblock In \emph{2026 {European} {Control} {Conference} ({ECC})}, pages
+  1746--1751. IEEE, 2026.
+
+\bibitem[Rapakoulias and Tsiotras(2023)]{Rapakoulias2023DiscreteCovariance}
+George Rapakoulias and Panagiotis Tsiotras.
+\newblock \emph{Discrete-time {Optimal} {Covariance} {Steering} via
+  {Semidefinite} {Programming}}.
+\newblock 2023.
+
+\bibitem[Rapakoulias et~al.(2025)Rapakoulias, Reza~Pedram, and
+  Tsiotras]{Rapakoulias2025MeanFieldGMM}
+George Rapakoulias, Ali Reza~Pedram, and Panagiotis Tsiotras.
+\newblock Steering {Large} {Agent} {Populations} {Using} {Mean}-{Field}
+  {Schr}{\" o}dinger {Bridges} {With} {Gaussian} {Mixture} {Models}.
+\newblock \emph{IEEE Control Syst. Lett.}, 9:\penalty0 1760--1765, 2025.
+
+\end{thebibliography}
