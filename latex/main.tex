@@ -88,134 +88,146 @@ where probability flux is $\displaystyle J( m,\alpha ) =\sqrt{2\kappa } m-\rho \
 
 
 
-
-
 \subsection{Assumption}
 \begin{itemize}
 \item The domain $\displaystyle \mathcal{D} \subset \mathbb{R}^{d}$ is sufficiently regular. 
-\item Interacting term $\displaystyle E\in \mathcal{C}^{2}\left(\mathbb{R}^{d} ;\mathbb{R}\right)$ is symmetric, i.e. $\displaystyle E( \cdot ) =E( -\cdot )$ with $\displaystyle \sup _{z,v\in \mathbb{R}^{d}} v^{\top } \nabla ^{2} E( z) v< +\infty $. 
-\item The admissible control process $\displaystyle \Theta _{\alpha } =L^{2}$. And $\displaystyle \Theta _{\rho }$ be such that $\displaystyle \rho \in L^{2}\left( 0,T;H^{1}\right) \cap \mathcal{C}\left(\mathcal{T} ;L^{2}\right)$ with $\displaystyle \rho \geqslant 0$, $\displaystyle {\textstyle \int _{\mathcal{D}} \rho =1}$, $\displaystyle \rho ( 0,\cdot ) dx=\mu _{\text{init}}$, $\displaystyle \rho ( T,\cdot ) dx=\mu _{\text{targ}}$. And $\displaystyle \Theta _{m} =L^{2}\left( 0,T;L^{2}\right)$.
+\item Interacting term $\displaystyle E\in \mathcal{C}^{2}\left(\mathbb{R}^{d} ;\mathbb{R}\right)$ is symmetric, i.e. $\displaystyle E( \cdot ) =E( -\cdot )$ with $\displaystyle \sup\nolimits _{z,v\in \mathbb{R}^{d}} v^{\top } \nabla ^{2} E( z) v< +\infty $. 
+\item The admissible controls $\displaystyle \alpha \in \Theta _{\alpha } \coloneq H^{1}( \rho )$ s.t. $\displaystyle \exists \psi \in H^{1}$ with $\displaystyle \alpha =\nabla \psi $, $\displaystyle | m| ^{2} /\rho \in L^{1}$, and $\displaystyle \rho \in \mathcal{C}\left(\mathcal{T} ,\mathscr{P}(\mathcal{D})\right) \cap L^{2}\left( 0,T;H^{1}(\mathcal{D})\right)$ with $\displaystyle \rho \geqslant 0$, $\displaystyle {\textstyle \int _{\mathcal{D}} \rho =1}$ and $\displaystyle \rho ( 0,\cdot ) dx=\mu _{\text{init}}$, $\displaystyle \rho ( T,\cdot ) dx=\mu _{\text{targ}}$
 \end{itemize}
+
 The rest of this work focus solving the following coupled FB-PDEs which can be drived in straightforward manner by mean of Lagrange Multiplier on Banach space. The difference between (PDE-opt) and that which given by \cite{Backhoff2020MeanFieldErgodic} is the extra boundary condition.
-
-
-
-
 \begin{proposition}
-There exists $\displaystyle \Phi \in H^{-1}$such that the optimal control $\displaystyle \alpha ^{*} ,\rho ^{*}$ are given by $\displaystyle \alpha ^{*} =-\sqrt{2\kappa } \nabla \log \phi $ where $\displaystyle ( \phi ,\rho )\rightarrow ( \varphi ,\hat{\varphi }) \coloneq ( e^{-\phi } ,\rho \exp( E\star \rho /\kappa +\phi )$ solve the following FB-PDEs:
+The optimal control $\displaystyle \alpha ^{*} ,\rho ^{*}$ are given by $\displaystyle \alpha ^{*} =\sqrt{2\kappa } \nabla \log \varphi $ where $\displaystyle ( \phi ,\rho )\rightarrow ( \varphi ,\hat{\varphi }) \coloneq ( e^{-\phi } ,\rho \exp( E\star \rho /\kappa +\phi )$ solve the following FB-PDEs:
 \begin{equation}
 \begin{aligned}
 \begin{cases}
-\partial _{t} \varphi =\left(\mathcal{A}^{\rho } +\mathcal{R}^{\rho }\right)[ \varphi ] & \\
-\partial _{t}\hat{\varphi } =-\left(\mathcal{A}^{\rho } +\mathcal{R}^{\rho }\right)[\hat{\varphi }] & 
+-\partial _{t} \varphi =\left(\mathcal{A}^{\rho } +\mathcal{R}^{\rho }\right)[ \varphi ] & \\
+\partial _{t}\hat{\varphi } =\left(\mathcal{A}^{\rho ,\dagger } +\mathcal{R}^{\rho ,\dagger }\right)[\hat{\varphi }] & 
 \end{cases} ,\  & \text{on} \ {\displaystyle (0,T)\times \mathcal{D} ,} \  & \text{such that} \  & \begin{cases}
-\nabla \varphi \cdot \mathbf{n} =\nabla \hat{\varphi } \cdot \mathbf{n} =0,\ \text{on} \ ( 0,T) \times \partial \mathcal{D}\\
+\nabla \varphi ^{\top }\mathbf{n} =\nabla \hat{\varphi }^{\top }\mathbf{n} =0,\ \text{on} \ ( 0,T) \times \partial \mathcal{D}\\
 \mu _{\text{init}} =W[ \rho ] \varphi _{0}\hat{\varphi }_{0} ,\ \text{on} \ \{0\} \times \mathcal{D}\\
 \mu _{\text{targ}} =W[ \rho ] \varphi _{T}\hat{\varphi }_{T} ,\ \text{on} \ \text{\{T\}} \times \mathcal{D}
 \end{cases} & 
 \end{aligned}
 \end{equation}
-where $\displaystyle \mathcal{A}^{\rho }[ \eta ] \coloneq ( \nabla E\star \rho ) \cdot \nabla \eta -\kappa \Delta \eta $ is advection-diffusion operator and $\displaystyle {\textstyle \mathcal{R}^{\rho }[ \eta ] \coloneq -\eta \nabla E\star ( \rho \cdot \nabla \log \eta )}$ is nonlocal source term, and $\displaystyle W[ \rho ]( t,x) \coloneq e^{-E\star \rho /\kappa }$.
+where $\displaystyle \mathcal{A}^{\rho }[ \eta ] \coloneq ( \nabla E\star \rho ) \cdot \nabla \eta -\kappa \Delta \eta $ is advection-diffusion operator and $\displaystyle {\textstyle \mathcal{R}^{\rho }[ \eta ] \coloneq -\eta \nabla E\star ( \rho \nabla \log \eta )}$ is nonlocal source term, and $\displaystyle W[ \rho ]( t,x) \coloneq e^{-E\star \rho /\kappa }$.
 \end{proposition}
 
 
-\section{Numerical Scheme}
 
 
-The idea is to constructive iterative scheme to find fixed point of marginal flow $\displaystyle \rho =( \rho _{t})_{t\in \mathcal{T}}$ given by $\displaystyle F:\mathcal{C}\left(\mathcal{T} ;\mathscr{P}\left(\mathbb{R}^{d}\right)\right)\rightarrow \mathcal{C}\left(\mathcal{T} ;\mathscr{P}\left(\mathbb{R}^{d}\right)\right)$. And for fixed $\displaystyle \rho ^{n}$ at iteration $\displaystyle n=1,...,N_{\text{iter}}$, the inner map for potential pairs $\displaystyle \left( \varphi ^{*} ,\hat{\varphi }^{*}\right) =G\left(\left( \varphi ^{*} ,\hat{\varphi }^{*}\right) ;\rho ^{n}\right)$. Define 
+\subsection{Fixed-Point Iterates}
+The constructive scheme for the PDE-opt solver is obtained via a single-loop Picard-Sinkhorn iteration to find the fixed point of the flow $\rho = (\rho_t)_{t\in\mathcal{T}} \in \mathcal{C}(\mathcal{T}\mathscr{P}(\mathcal{D}))$. We define the marginal map $F$ and the inner propagator $G$ by
 \begin{equation}
 \begin{aligned}
-F\left( \rho ;\varphi ^{*} ,\hat{\varphi }^{*}\right) \coloneq W[ \rho ] \varphi ^{*}\hat{\varphi }^{*} \  & \ \text{and} \  & G( \cdot ;\mu ) \coloneq M_{T}\mathcal{\circ } S_{0\rightarrow T}^{\dagger } \circ M_{0}\mathcal{\circ } S_{T\rightarrow 0}
-\end{aligned} .
-\end{equation}
-Here $\displaystyle S_{0\rightarrow T}$ and $\displaystyle S_{T\rightarrow 0}$ the forward and backward propagator operator of FB-PDEs in (PDE-opt) respectively. The operators $\displaystyle M_{0}$ and $\displaystyle M_{T}$ are Sinkhorn updates that enforce marginal constrants, defined by
+F[\rho; \varphi, \hat{\varphi}] \coloneq W[\rho]\varphi\hat{\varphi} \quad \text{and} \quad G[\varphi_T; \mu, \varphi, \hat{\varphi}] \coloneq \left( M_T^{\mu} \mathcal{S}_{0\to T}^{\dagger, \mu, \hat{\varphi}} \circ M_0^{\mu} \mathcal{S}_{T\to 0}^{\mu, \varphi} \right)[\varphi_T].
+\end{aligned}
+\end{equation}%
+The propagator $G$ shares a very similar structure with the classical linear Schrödinger bridge (SB), which is a well-studied numerical method~\cite{Chen2021SinkhornReview, leonard2012from}. Here, $\mathcal{S}_{0\to T}^{\dagger, \mu, \hat{\varphi}}$ and $\mathcal{S}_{T\to 0}^{\mu, \varphi}$ are respectively the backward and forward time-split propagators of the linearized PDE-opt system frozen at $(\mu, \varphi, \hat{\varphi})$. The term ``linearized PDEs'' refers to the fact that under fixed $(\rho^{n-1}, \varphi^{n-1}, \hat{\varphi}^{n-1})$, both the nonlocal drift $b_t^{n-1} \coloneq -\nabla E \ast \rho_t^{n-1}$ and the reaction rate $r_t^{n-1} \coloneq -\nabla E \ast (\rho_t^{n-1} \nabla \log \varphi_t^{n-1}) \in L^\infty(\mathcal{D})$ are frozen in time and space, reducing the nonlinear forward-backward PDEs to standard non-autonomous linear Cauchy problems with the time-varying generator $\mathcal{A}_t^{n-1} + \mathcal{R}_t^{n-1}$. It follows that this generator induces a unique backward evolution family $(\mathcal{P}_{t\to s}^{n-1})_{0 \leqslant s \leqslant t \leqslant T}$ on $L^2(\mathcal{D})$; see also~\cite{BatkaiCsomosFarkasNickel2011}. Here, $M_T^{\mu}$ and $M_0^{\mu}$ are Sinkhorn scaling operators defined pointwise by
 \begin{equation}
 \begin{aligned}
-\hat{\varphi }_{0}\xleftarrow{M_{0}( \varphi ;\mu )}\frac{\mu _{\text{init}}}{W[ \mu ]( x,0) \varphi ( x,0)} & \ ,\ \text{and} \  & \hat{\varphi }_{T}\xleftarrow{M_{T}( \varphi ;\mu )}\frac{\mu _{\text{targ}}}{W[ \mu ]( x,T) \varphi ( x,T)}
-\end{aligned} .
-\end{equation}
-For fixed $\displaystyle \rho ^{n}$ (along with its convolution $\nabla E\star \rho ^{n}$ and frozen log-gradient terms), the PDEs become linear Cauchy problems. And the time-varying operator $\displaystyle \mathcal{A} +\mathcal{R}$ (through density flow) admits unique evolution family $\displaystyle ( P_{s,t})_{0\leqslant s\leqslant t\leqslant T}$, see also \cite{BatkaiCsomosFarkasNickel2011}. Over small $\displaystyle \Delta t=t_{k+1} -t_{k}$, the Strang Splitting regime for backward PDE for $\displaystyle \varphi $ is defined as 
+\hat{\varphi}_0(\cdot) \xleftarrow{M_0^{\mu}} \frac{\mu_{\text{init}}(\cdot)}{W[\mu](\cdot, 0)\varphi(\cdot, 0)} \quad \text{and} \quad \hat{\varphi}_T(\cdot) \xleftarrow{M_T^{\mu}} \frac{\mu_{\text{targ}}(\cdot)}{W[\mu](\cdot, T)\varphi(\cdot, T)}.
+\end{aligned}
+\end{equation}%
+Note that these two operators are similar to those in~\cite{Eldesoukey2026MeanFieldSinkhorn}. We suppress the superscripts $\rho^{n-1}, \varphi^{n-1}$ for readability. For a uniform temporal subdivision $0 = t_0 < t_1 < \dots < t_{N_T} = T$ of step size $\Delta t = t_{k+1} - t_k$, we define the exact continuous symmetric Strang splitting $\mathcal{S}_{t_{k+1}\to t_k}$ acting on $\varphi$ via the composition
 \begin{equation}
-\varphi ( t_{k}) \approx S_{t_{k+1} ,t_{k}}[ \varphi ]( t_{k+1} ,\cdot ) \coloneq ( R_{t_{k+\Delta t/2} ,t_{k}} \circ U_{t_{k+1} ,t_{k}} \circ R_{t_{k+1} ,t_{k} +\Delta t/2})[ \varphi ]( t_{k+1} ,\cdot )
-\end{equation}
-where $\displaystyle {\textstyle R_{s,t}[ \varphi ] =\varphi \exp\int _{s}^{t} r_{u} du}$ where $\displaystyle r\in L^{\infty }(\mathcal{D})$ since $\displaystyle R$ is bounded multiplicative. For diffusion-advection subproblem, $\displaystyle U$ has probabilistic representation \cite{milstein2000numerical} given by Markov propagator
+\varphi(t_k, \cdot) \approx \mathcal{S}_{t_{k+1}, t_k}[\varphi](t_{k+1}, \cdot) \coloneq \left(\mathcal{R}_{t_{k+\Delta t/2}\to t_k} \circ \mathcal{U}_{t_{k+1}\to t_k} \circ \mathcal{R}_{t_{k+1}\to t_{k+\Delta t/2}}\right)[\varphi](t_{k+1}, \cdot).
+\end{equation}%
+Since $\mathcal{R}[\eta](s,x) = r_s(x)\eta(x)$ is a bounded pointwise multiplication operator on $L^2(\mathcal{D})$, it admits an analytical solution of the form $\mathcal{R}_{t\to s}[\eta](x) = \eta(x)\exp\int_s^t r_u(x)\,du$, whose half-step approximations via quadrature points are given by
 \begin{equation}
-{\textstyle U_{s,t}[ \eta ]( x) \coloneq \mathbb{E}^{\mathbb{P}}\left[ \eta ( t,X_{t})\middle| X_{s} =x\right] =\lim _{K\rightarrow \infty }\sum _{1\leqslant m\leqslant K} w_{m} \eta \left( t,X_{s,t}^{x}( \omega _{m})\right)}
-\end{equation}
-with appropriate weight positive, normalized $\displaystyle w_{m}$. Here $\displaystyle X_{t}$ is chosen to be a solution to reference reflected-SDE in (1) with initial condition $\displaystyle X_{s} =x$ for fixed $\displaystyle \rho ^{n}$, and. For finite $\displaystyle K$, a typical variance of random variable $\displaystyle {\textstyle \eta \left( t,X_{s,t}^{x}\right)}$ in (11) has size $\displaystyle t$, and the by law of large number for finite $\displaystyle K$ the estimate error is of order $\displaystyle O\left(\sqrt{T/K}\right)$. Let $\displaystyle {\textstyle S_{T\rightarrow 0} \coloneq \prod _{j=N_{T} -1}^{0} S_{k,k+1}}$. It follows that the that Strang Splitting satisfies 2nd-order truncation bound \cite{BatkaiCsomosFarkasNickel2011}, for some $\displaystyle C\geqslant 0$:
+\begin{aligned}
+\tilde{\mathcal{R}}_{k+1\to k+\Delta t/2}[\eta] \coloneq \eta e^{\Delta t r_{t_{k+1}}/2} \quad \text{and} \quad \tilde{\mathcal{R}}_{k+\Delta t/2\to k}[\eta] \coloneq \eta e^{\Delta t r_{t_k}/2}.
+\end{aligned}
+\end{equation}%
+Next, the middle operator $\mathcal{U}_{t_{k+1}\to t_k}$ solving the advection-diffusion subproblem has the Feynman-Kac representation~\cite{milstein2000numerical} over $[t_k, t_{k+1}]$ with Neumann boundary conditions given by
 \begin{equation}
-{\textstyle \Vert P_{0,T} \varphi _{T} -S_{T\rightarrow 0} \varphi _{T}\Vert _{L^{2}} \leqslant C\cdot \Delta t^{2}}\Vert \varphi _{T}\Vert _{L^{2}}
-\end{equation}
-Similarly, since forward PDE is formal $\displaystyle L^{2}$-adjoint of the backward one, so $\displaystyle S_{t_{k} ,t_{k+1}}^{\dagger }$ is exactly given by reversing operation: 
+\mathcal{U}_{t_{k+1}, t_k}[\eta](x) \coloneq \mathbb{E}^{\mathbb{P}}\left[\eta(t_k, X_{t_k}) \mid X_{t_{k+1}} = x\right] = \lim_{K\to\infty} \sum_{1 \leqslant m \leqslant K} w_m \eta\left(t, X_{t_k, t_{k+1}}^x(\omega_m)\right),
+\end{equation}%
+where $X_{t_k, t_{k+1}}$ solves (for fixed $\rho$) the forward process starting from $X_{t_k} = x$, and $w_m$ are normalized positive weights. Due to random noise incurred by finite approximations of expectations via Monte Carlo (of order $O(\sqrt{\Delta t / K})$), a deterministic cubature stencil is used instead, known as the Semi-Lagrangian (SL) method. Defining $\mathcal{S}_{T\to 0} \coloneq \mathcal{S}_{t_1\to t_0} \circ \mathcal{S}_{t_2\to t_1} \circ \dots \circ \mathcal{S}_{t_{N_T}\to t_{N_{T-1}}}$, it is guaranteed~\cite{BatkaiCsomosFarkasNickel2011} that a second-order error bound for sufficiently smooth terminal data $\varphi_T$ holds; i.e., there exists $C \geqslant 0$ independent of $\Delta t$ such that
+\begin{equation}
+\|\mathcal{P}_{0,T} \varphi_T - \mathcal{S}_{T\to 0} \varphi_T\|_{L^2} \leqslant C \Delta t^2 \|\varphi_T\|_{L^2}.
+\end{equation}%
+Similarly, since the Fokker-Planck equation for $\hat{\varphi}$ is the formal $L^2$-adjoint of the backward equation, $\mathcal{S}_{k\to k+1}^\dagger \coloneq (\mathcal{S}_{k+1\to k})^\dagger$ is obtained simply by reversing the operation:
+\begin{equation}
+\hat{\varphi}(t_{k+1}, \cdot) \approx \mathcal{S}_{t_k\to t_{k+1}}^\dagger[\hat{\varphi}](t_k, \cdot) = \left(\mathcal{R}_{t_{k+1}\to t_{k+\Delta t/2}}^\dagger \circ \mathcal{U}_{t_{k+1}\to t_k}^\dagger \circ \mathcal{R}_{t_{k+\Delta t/2}\to t_k}^\dagger\right)[\hat{\varphi}](t_k, \cdot).
+\end{equation}%
+Notice that $\mathcal{R}_{t\to s}^\dagger = \mathcal{R}_{t\to s}$ is self-adjoint. Upon spatial discretization, this structure ensures the discretized forward propagator $\mathcal{S}_{0\to T}$ can be obtained via mass-weighted matrix transpose of $\mathcal{S}_{T\to 0}$; see also~\cite{eldesoukey2026schrodingerbridgeskineticswarming}.
 
-\begin{equation}
-\hat{\varphi }( t_{k+1}) \approx S_{t_{k} ,t_{k+1}}^{\dagger }[\hat{\varphi }]( t_{k} ,\cdot ) =\left( R_{t_{k+\Delta t/2} ,t_{k+1}}^{\dagger } \circ U_{t_{k} ,t_{k+1}}^{\dagger } \circ R_{t_{k} ,t_{k+\Delta t/2}}^{\dagger }\right)[\hat{\varphi }]( t_{k} ,\ \cdot )
-\end{equation}
-The useful property is that, upon spatial discretization, the discrete adjoint $\displaystyle S^{\dagger }$ can be obtained efficiently via matrix transposition of $\displaystyle S$, see also \cite{eldesoukey2026schrodingerbridgeskineticswarming}. The below algorithm summarizes the scheme. Here for $\displaystyle S\left[ \cdot ;\rho ^{n} ,\varphi ^{n}\right]$ indicates fixed evaluation point using $\displaystyle \rho ^{n}$ and $\displaystyle \varphi ^{n}$.
-
-\begin{algorithm}[H]
-\caption{\textbf{Solver 1: Fixed-Point Iteration}}
-\For{$n=1,\dotsc ,N_{\text{iter}}$}{
-  1. $\displaystyle \varphi ^{k}\leftarrow S_{T\rightarrow 0}\left[ \varphi _{T}^{n-1} ;\rho ^{n-1} ,\varphi ^{n-1}\right]$ \hfill \text{(backward propagate)}\\
-  2. $\displaystyle \hat{\varphi }_{0}\leftarrow M_{0}\left[ \varphi ^{n} ;\rho ^{n-1}\right]$ \hfill \text{(initial marginal scale)}\\
-  3. $\displaystyle \hat{\varphi }^{k}\leftarrow S_{0\rightarrow T}^{\dagger }\left[\hat{\varphi }_{0} ;\rho ^{n} ,\hat{\varphi }^{n-1}\right]$ \hfill \text{(forward propagate)}\\
-  4. $\displaystyle \varphi _{T}^{\text{next}}\leftarrow M_{T}\left[\hat{\varphi }^{n} ;\rho ^{n-1}\right]$ \hfill \text{(terminal marginal scale)}\\
-  5. $\displaystyle \rho ^{n}\leftarrow F\left[ \rho ^{n-1} ;\varphi ^{n} ,\hat{\varphi }^{n}\right]$ \hfill \text{(density update)}
+\begin{algorithm}[ht]
+\DontPrintSemicolon
+\KwIn{$\mu_{\text{init}}, \mu_{\text{targ}} \in \mathbb{R}_{>0}^{N_x}$, $\Delta t = T/N_T$, $\theta \in (0, 1]$, threshold $\epsilon > 0$.}
+\textbf{Initialize:} $\boldsymbol{\varphi}_k^0, \hat{\boldsymbol{\varphi}}_k^0 \leftarrow \mathbb{1}_{N_x}$ and $\boldsymbol{\rho}^0 \leftarrow \mathbb{1}_{N_x} / \operatorname{Vol}_d(\mathcal{D})$ for $k = 0, \dots, N_T$.
+\For{$n = 1, \dots, N_{\text{iter}}$}{
+    Compute $\mathbf{V}_k^{n-1}, \mathbf{W}_k^{n-1}, \mathbf{R}_k^{n-1}, \mathbf{r}_k^{n-1}, \mathbf{b}_{k,l}^{n-1}$ for $k = 0, \dots, N_T$\;
+    Set $\boldsymbol{\varphi}_{N_T}^n \leftarrow \boldsymbol{\varphi}_{N_T}^{n-1}$\;
+    \For{$k = N_T - 1, N_T - 2, \dots, 0$}{
+        $\boldsymbol{\varphi}_k^n \leftarrow \mathbf{R}_k^{n-1} \mathbf{\Pi}_k^{n-1} \mathbf{R}_{k+1}^{n-1} \boldsymbol{\varphi}_{k+1}^n$\;
+    }
+    Set $\hat{\boldsymbol{\varphi}}_0^n \leftarrow \boldsymbol{\mu}_{\text{init}} \oslash \left(\operatorname{diag}(\mathbf{W}_0^{n-1}) \odot \boldsymbol{\varphi}_0^n\right)$\;
+    \For{$k = 0, \dots, N_T - 1$}{
+        $\hat{\boldsymbol{\varphi}}_{k+1}^n \leftarrow \mathbf{R}_{k+1}^{n-1} \mathbf{\Pi}_k^{n-1,\dagger} \mathbf{R}_k^{n-1} \hat{\boldsymbol{\varphi}}_k^n$\;
+    }
+    Set $\boldsymbol{\varphi}_{N_T}^n \leftarrow \boldsymbol{\mu}_{\text{targ}} \oslash \left(\operatorname{diag}(\mathbf{W}_{N_T}^{n-1}) \odot \hat{\boldsymbol{\varphi}}_{N_T}^n\right)$\;
+    Compute $\boldsymbol{\rho}_k^{1/2} = \operatorname{diag}(\mathbf{W}_k^{n-1}) \odot \boldsymbol{\varphi}_k^n \odot \hat{\boldsymbol{\varphi}}_k^n$ and normalize in $L^1(\mathcal{D}_\Delta)$: $\boldsymbol{\rho}_k^{1/2} \leftarrow \boldsymbol{\rho}_k^{1/2} / (\mathbf{1}^\top M_{\text{lump}} \boldsymbol{\rho}_k^{1/2})$\;
+    Set $\boldsymbol{\rho}_k^n = (1-\theta)\boldsymbol{\rho}_k^{n-1} + \theta\boldsymbol{\rho}_k^{1/2}$ for $k = 0, \dots, N_T$\;
+    \If{$\max_{1 \leqslant k \leqslant N_T-1} \|\boldsymbol{\rho}_k^n - \boldsymbol{\rho}_k^{n-1}\|_\infty \leqslant \epsilon$}{
+        \textbf{break}\;
+    }
 }
+
+\caption{Fixed-Point Iteration Solver}
 \end{algorithm}
 
-
-The main difference between Solver 1 \cite{eldesoukey2026second} is that it only comprise one loop iteration without nested structure. The motivation behind this construction the ability to adopt a type of fictitous play in the MFG setting (or a Picard-iterate type), while able to adopt the standard Sinkhorn scaling method which only applicable to narrow set of PDEs structure. 
+Unlike the nested two-loop scheme in~\cite{Eichinger2026SinkhornConvergence, eldesoukey2026second, eldesoukey2026schrodingerbridgeskineticswarming}, Solver 1 executes only a single loop, and the nonlocal drift and reaction terms are updated alongside the scaling operators $M_0$ and $M_T$. This structure closely mirrors fictitious play and Picard iteration in mean-field games (MFG)~\cite{Inoue2023FictitiousPlay} with extended Sinkhorn scaling applied to PDEs. The next section concerns spatial discretization via a monotone $P_1$ finite element Semi-Lagrangian scheme.
+\begin{algorithm}[ht]
+\DontPrintSemicolon
+\For{$n = 1, \dots, N_{\text{iter}}$}{
+    $\varphi^n \leftarrow \mathcal{S}_{T\to 0}\left[\varphi_T^{n-1}; \rho^{n-1}, \varphi^{n-1}\right]$ \tcp*{backward propagate}
+    $\hat{\varphi}_0^n \leftarrow M_0^{\rho^{n-1}}\left[\varphi^n\right]$ \tcp*{initial marginal scale}
+    $\hat{\varphi}^n \leftarrow \mathcal{S}_{0\to T}^\dagger\left[\hat{\varphi}_0^n; \rho^n, \hat{\varphi}^n\right]$ \tcp*{forward propagate}
+    $\varphi_T^n \leftarrow M_T^{\rho^{n-1}}\left[\hat{\varphi}^n\right]$ \tcp*{terminal marginal scale}
+    $\rho^n \leftarrow (1-\theta)\rho^{n-1} + \theta F\left[\rho^{n-1}; \varphi^n, \hat{\varphi}^n\right]$ \tcp*{density update}
+}
+\caption{Solver 1: Fixed-Point Iteration}
+\end{algorithm}
 
 \subsection{Semi-Lagrangian Discretization}
-What left now is to discretize in space via SL. It is known that \cite{CalzolaCarliniDupuisSilva2023} SL scheme is monotone, consistent and stable for HJB, contrary to finite difference, therefore the transformed variable converges to exact true field under appropriate conditions. Let $\displaystyle \mathcal{D}_{\Delta } =\{x_{i}\}_{1\leqslant i\leqslant N_{x}} \subset \mathcal{D}$ a nodes of a simplicial triangulation over the polyhedral domain $\displaystyle \mathcal{D}$, and time subdivision $\displaystyle \mathcal{T}_{\Delta } =\{t_{k} =k\Delta t\}_{0\leqslant k\leqslant N_{t}}$. At $\displaystyle t_{k}$, the continuous field $\displaystyle \eta \in L^{2}(\mathcal{D})$ is approximated by nodal values $\displaystyle \mathbf{\eta }_{k} \in \mathbb{R}^{N_{x}}$. Its continuous reconstruction is obtained with P1 finite element interpolator $\displaystyle \mathcal{I} :L^{2}(\mathcal{D}_{\Delta })\rightarrow \mathcal{C}_{b}(\mathcal{D})$ defined by $\displaystyle {\textstyle \mathcal{I}[ \eta ]( \cdot ) \coloneq \mathbf{\beta }( \cdot )^{\top }\mathbf{\eta }}$ where $\displaystyle \beta =( \beta _{1} ,...\beta _{N_{x}})^{\top }$ is vector of standard piecewise linear Lagrange basis with $\displaystyle {\textstyle \beta }_{i} (x_{j} )=\delta _{ij}$ and $\displaystyle \mathbf{1}^{\top }\mathbf{\beta } =1$. This interpolation introduces a spatial discretization error strictly bounded by $O(\Delta x^{2} )$. Following \cite{CarliniSilva2013}, choose $\displaystyle \beta _{i}( a) =\max\left\{0,1-| a-x_{i}| /\Delta x\right\}$ which has support on $\displaystyle [ x_{i} -\Delta x,x_{i} +\Delta x]$. The approximate of $\displaystyle U_{t_{k} ,t_{k+1}}[ \eta ]( x_{i})$ is given by stochastic 3-branches stencil. For each node $\displaystyle x_{k,i} \in \mathcal{D}_{\Delta }$, the advective transport under reference drift $\displaystyle \mathbf{b}_{k,i} \in \mathbb{R}^{d}$ with diffusion $\displaystyle 2\kappa \mathbb{I}_{d}$ is approximated by (unconstrained) backward characteristic path
+What remains now is spatial discretization via SL. As mentioned in~\cite{CalzolaCarliniDupuisSilva2023}, the SL scheme is monotone, unconditionally stable, and positivity-preserving without requiring the parabolic CFL condition $\Delta t = O(\Delta x^2)$. Let $\mathcal{D}_\Delta = \{x_i\}_{1 \leqslant i \leqslant N_x} \subset \overline{\mathcal{D}}$ be the vertices of a simplicial triangulation of size $\Delta x$ over the polyhedral domain $\mathcal{D}$, and let $\mathcal{T}_\Delta = \{t_k = k\Delta t\}_{0 \leqslant k \leqslant N_t}$ be the time subdivision. At $t_k$, the continuous field $\eta \in L^2(\mathcal{D})$ is approximated by nodal values $\boldsymbol{\eta}_k = (\eta_{k,1}, \dots, \eta_{k,N_x}) \in \mathbb{R}^{N_x}$. Its continuous reconstruction is obtained via the $P_1$ finite element interpolator $\mathcal{I} : \mathbb{R}^{N_x} \to \mathcal{C}_b(\mathcal{D})$ defined by $\mathcal{I}[\eta](\cdot) \coloneq \boldsymbol{\beta}(\cdot)^\top \boldsymbol{\eta}$, where $\boldsymbol{\beta} = (\beta_1, \dots, \beta_{N_x})^\top$ is the vector of standard piecewise linear Lagrange basis functions satisfying $\beta_i(x_j) = \delta_{ij}$ and $\mathbf{1}^\top \boldsymbol{\beta} = 1$. This interpolation introduces a spatial discretization error strictly bounded by $O(\Delta x^2)$. Following~\cite{CarliniSilva2013}, we choose $\beta_i(x) = \max\{0, 1 - |x - x_i|/\Delta x\}$, which has support on $[x_i - \Delta x, x_i + \Delta x]$. The choice of linear interpolants (yielding $O(\Delta x^2)$ error) over higher-order alternatives such as Hermite polynomials or splines (which achieve spatial errors up to $O(\Delta x^4)$) is motivated by properties endowed by $\mathcal{I}$, such as positivity preservation, monotonicity, and computational efficiency.%
+
+We approximate $\mathcal{U}_{t_{k+1}\to t_k}$ with a second-order weak $(2d+1)$-point stencil; see~\cite{CalzolaCarliniDupuisSilva2023}. For node $x_i \in \mathcal{D}_\Delta$ at time $t_k$, the advective transport under reference drift $\mathbf{b}_{k,i}^{n-1} \coloneq (-\nabla E \star \rho_k^{n-1})(x_i) \in \mathbb{R}^d$ with diffusivity $2\kappa \mathbb{I}_d$ is approximated by the unconstrained backward characteristic path over $[t_k, t_{k+1}]$ via
 \begin{equation}
 \begin{aligned}
-y_{k,i,l}^{s}( a) =x_{i} -\Delta tb_{k,i} +e_{l} s\sqrt{6\kappa d\Delta t} ,\  & & \ s\in \{0,\pm 1\} ,\ l\in \{1,...,d\}
-\end{aligned} .
-\end{equation}
-where $\displaystyle e_{l}$ is the canonical basis. The Neuman reflection boundary can be enforced to characteristic that exit the domain, following \cite{CalzolaCarliniDupuisSilva2023} for special case of normal reflection. Specifically, recall that $\displaystyle \chi < 0\Longleftrightarrow x\notin \mathcal{D}$ is chosen to be sign-distance function, the Skorokhod map reads
-\begin{equation}
-\hat{y}_{k,\mathbf{i} ,\ell }^{s} :=\begin{cases}
-y_{k,\mathbf{i} ,\ell }^{s} & \text{if } y_{k,\mathbf{i} ,\ell }^{s} \in \mathcal{D} ,\\
-y_{k,\mathbf{i} ,\ell }^{s} -2\chi \left( y_{k,i,l}^{s}\right)\mathbf{n}\left( \chi \left( y_{k,i,l}^{s}\right)\right) & \text{if } y_{k,\mathbf{i} ,\ell }^{s} \notin \mathcal{D} .
-\end{cases}
-\end{equation}
-where $\displaystyle \mathbf{n}\left( \chi ( a)\right) =\nabla \chi ( a) /\left\Vert \nabla \chi ( a)\right\Vert _{2}$. Using (11) and 3 stencil weights, the fully discrete SL approximate at $\displaystyle x_{i}$ is given by $\displaystyle {\textstyle U_{t_{k} ,t_{k+1}}[\mathbf{\eta }]( x_{i}) \approx \sum _{1\leqslant j\leqslant N_{x}}(\mathbf{\Pi }_{k})_{i,j} \eta _{j}}$, where $\displaystyle \mathbf{\Pi }_{k} \in \mathbb{R}^{N_{x} \times N_{x}}$ is given by 
-\begin{equation}
-{\textstyle (\mathbf{\Pi }_{k})_{a,b} \coloneq \frac{2}{3} \beta _{j}\left(\hat{y}_{k,i,1}^{0}\right) +\frac{1}{6d}\sum _{\ell =1}^{d} \beta _{j}\left(\hat{y}_{k,i,\ell }^{+}\right) +\beta _{j}\left(\hat{y}_{k,i,\ell }^{-}\right)}
-\end{equation}
-This choice is has 2nd-order accurachy: $\displaystyle \mathbb{E}[ \Delta Y_{i}] =-\Delta tb_{k}( x_{i})$ and $\displaystyle \text{Cov}( \Delta Y_{i}) =2\kappa \Delta t\mathbb{I}_{d}$,which is congruent with $\displaystyle \mathbb{E}[ dX_{t}]$ and $\displaystyle \text{Cov}\left(\sqrt{2\kappa } dW_{t}\right)$, respectively. For probabilistic interpretation in term of controlled-markov process of SL scheme, see \cite{CalzolaCarliniDupuisSilva2023}. Define 
-\begin{equation}
-\begin{aligned}
-{\textstyle \mathbf{V}_{k} \coloneq \sum\nolimits _{1\leqslant j\leqslant N_{x}} E( x_{i} -x_{j}) \rho _{k,j} m_{j}} & & {\textstyle ,\ } & & {\textstyle \mathbf{W}_{k} \coloneq \text{diag}\exp( -\mathbf{V}_{k} /\kappa )}\\
-{\textstyle \mathbf{R}_{n,\pm 1/2} =\text{diag}\exp\left( \pm \frac{\Delta t}{2}\boldsymbol{r}_{k}^{n-1}\right)} & & ,\  & & \mathbf{r}_{k}^{n} =-\mathbf{b}_{k}^{\top } \nabla \log(\mathbf{\varphi }_{k} /\mathbf{\rho }_{k})
+y_{k,i,l}^s(a) = x_i - \Delta t \mathbf{b}_{k,i}^{n-1} + e_l s \sqrt{6\kappa d \Delta t}, \quad s \in \{0, \pm 1\}, \; l \in \{1, \dots, d\},
 \end{aligned}
-\end{equation}
-Note also that the discrete $\displaystyle L^{2}$-adjoint for forward $\displaystyle U_{t_{k} ,t_{k+1}}$ is simply transpose given by $\displaystyle \mathbf{\Pi }_{k}^{\dagger } =M_{\text{lump}}^{-1}\mathbf{\Pi }_{k}^{\top } M_{\text{lump}}$ where $\displaystyle {\textstyle M_{\text{lump}} =\text{diag}( m_{1} ,...,m_{N_{x}}) ,\ m_{i} =\int _{\mathcal{D}} \beta _{i}( a) da}$. 
+\end{equation}%
+where $e_l$ is the canonical basis vector. Neumann reflection boundary conditions are enforced for any characteristic exiting $\mathcal{D}$, following~\cite{CalzolaCarliniDupuisSilva2023} for the special case of normal reflection. Specifically, recalling that $\chi < 0 \Longleftrightarrow x \notin \mathcal{D}$ denotes the signed distance function, the Skorokhod map reads
+\begin{equation}
+\hat{y}_{k,\mathbf{i},\ell}^s \coloneq \begin{cases}
+y_{k,\mathbf{i},\ell}^s & \text{if } y_{k,\mathbf{i},\ell}^s \in \mathcal{D}, \\
+y_{k,\mathbf{i},\ell}^s - 2\chi(y_{k,i,l}^s) \mathbf{n}(\chi(y_{k,i,l}^s)) & \text{if } y_{k,\mathbf{i},\ell}^s \notin \mathcal{D},
+\end{cases}
+\end{equation}%
+where $\mathbf{n}(\chi(a)) = \nabla\chi(a)/\|\nabla\chi(a\|_2$. Using these positions and three stencil weights, the fully discrete SL operator approximated at $x_i$ is given by the transition matrix $\mathbf{\Pi}_k \in \mathbb{R}^{N_x \times N_x}$ via $\mathcal{U}_{t_{k+1}\to t_k}[\boldsymbol{\eta}](x_i) \approx \sum_{1 \leqslant j \leqslant N_x} (\mathbf{\Pi}_k^{n-1})_{i,j} \eta_j$, where
+\begin{equation}
+(\mathbf{\Pi}_k)_{a,b} \coloneq \frac{2}{3} \beta_j(\hat{y}_{k,i,1}^0) + \frac{1}{6d} \sum_{\ell = 1}^d \left( \beta_j(\hat{y}_{k,i,\ell}^+) + \beta_j(\hat{y}_{k,i,\ell}^-) \right).
+\end{equation}%
+This choice achieves second-order accuracy. For the increment $\Delta Y_{k,i} = Y_{k,i} - x_i$, we have $\mathbb{E}[\Delta Y_{k,i}] = -\Delta t \mathbf{b}_k^{n-1}(x_i)$ and $\operatorname{Cov}(\Delta Y_{k,i}) = 2\kappa \Delta t \mathbb{I}_d + O(\Delta t^2)$, which is congruent with $\mathbb{E}[dX_t]$ and $\operatorname{Cov}(\sqrt{2\kappa} dW_t)$ up to second order, respectively. Furthermore, by construction, the matrix $\mathbf{\Pi}$ is row-stochastic (i.e., non-negative with $\mathbf{\Pi}^\top \mathbf{1} = \mathbf{1}$). For a probabilistic interpretation of the SL scheme in terms of controlled Markov processes, see~\cite{CalzolaCarliniDupuisSilva2023}. Finally, let $M_{\text{lump}} = \operatorname{diag}(m_1, \dots, m_{N_x})$ with mass weights $m_i = \int_{\mathcal{D}} \beta_i(a)\,da > 0$, and let $\mathbf{D}_l \in \mathbb{R}^{N_x \times N_x}$ be the lumped-mass discretized partial derivative $\partial_{x_l}$ along $l \in \{1, \dots, d\}$ defined by $(\mathbf{D}_l)_{i,j} = m_i^{-1} \int_{\mathcal{D}} \beta_i(x)\partial_{x_l}\beta_j(x)\,dx$.%
 
-\begin{algorithm}[H]
-\caption{\textbf{Algorithm 1: (Matrix-form for Solver 1)}}
-\KwIn{$\displaystyle \mu _{\text{init}} ,\mu _{\text{targ}} \in \mathscr{P}(\mathcal{D}_{\Delta })$, $\displaystyle \Delta t=T/N_{T}$, $\displaystyle \theta \in ( 0,1]$, threshold $\displaystyle \epsilon >0$}
-\textbf{Initialize:} $\displaystyle \mathbf{\varphi }_{k}^{0} ,\hat{\mathbf{\varphi }}_{k}^{0}\leftarrow \mathbb{1}_{N_{x}}$ and $\displaystyle \mathbf{\rho }^{0}\leftarrow \mathbb{1}_{N_{x}} /\text{Vol}_{d}(\mathcal{D})$, for $\displaystyle k=0,...,N_{T}$\;
-\For{each $n=1,..,N_{\text{iter}}$}{
-  Compute $\displaystyle {\textstyle b_{k}^{n-1}\leftarrow -( \nabla E\star \rho )_{k}}$, $\displaystyle W_{k}^{n-1}\leftarrow \text{diag}\exp\left( -\mathbf{V}_{k}^{n-1} /\kappa \right)$, for $\displaystyle k=0,...,N_{T}$\;
-  \For{each $k=N_{t} -1,N_{t} -2,...,0$}{
-    $\displaystyle \boldsymbol{\varphi }_{k}^{n} =\mathbf{R}_{k,+1/2}^{n-1}\mathbf{\Pi }_{k}\mathbf{R}_{k+1,-1/2}^{n-1}\boldsymbol{\varphi }_{k+1}^{n}$\;
-  }
-  Set $\displaystyle \hat{\boldsymbol{\varphi }}_{0}^{n} =\mathbf{\mu }_{\text{init}} \oslash \left(\mathbf{W}_{0}^{n-1} \odot \boldsymbol{\varphi }_{0}^{n}\right)$\;
-  \For{each $k=0,...,N_{T} -1$}{
-    $\displaystyle \hat{\mathbf{\varphi }}_{k+1}^{n} =\left(\mathbf{R}_{k+1,-1/2}^{n-1}\right)^{-1} \mathbf{\Pi }_{k}^{\dagger } \left(\mathbf{R}_{k,+1/2}^{n-1}\right)^{-1} \hat{\boldsymbol{\varphi }}_{k}^{n}$\;
-  }
-  Set $\displaystyle \boldsymbol{\varphi }_{N_{T}}^{n} =\boldsymbol{\mu }_{\text{targ}} \oslash \left(\mathbf{W}_{N_{T}}^{n-1} \odot \hat{\boldsymbol{\varphi }}_{N_{T}}^{n}\right)$\;
-  Set $\displaystyle \boldsymbol{\rho }_{k}^{1/2} =\mathbf{W}_{k}^{n-1} \odot \boldsymbol{\varphi }_{k}^{n} \odot \hat{\mathbf{\varphi }}_{k}^{n}$ and then normalize $\displaystyle {\textstyle \rho ^{1/2}\leftarrow \frac{\boldsymbol{\rho }_{k}^{1/2}}{\mathbf{1}^{T} M_{\text{lump}}\boldsymbol{\rho }_{k}^{1/2}}}$, for $\displaystyle j=0,...,N_{T} -1$\;
-  Update $\displaystyle \boldsymbol{\rho }_{k}^{n} =(1-\theta )\boldsymbol{\rho }_{k}^{n-1} +\theta \boldsymbol{\rho }_{k}^{1/2}$, for $\displaystyle j=0,...,N_{T} -1$\;
-  \If{$\displaystyle \max_{1\leqslant k\leqslant N_{T-1}}\left\Vert \rho _{k}^{n} -\rho _{k}^{n-1}\right\Vert _{\infty } \leqslant \epsilon$}{
-    \textbf{break}\;
-  }
-}
+The discretized objects are summarized below for iteration $n-1$ (dropping superscripts for clarity), step $k$, $l \in \{1, \dots, d\}$, and $i \in \{1, \dots, N_x\}$:
+\begin{equation}
+\begin{aligned}
+(\mathbf{V}_k)_i &\coloneq \sum_j E(x_i - x_j)\rho_{k,j} m_j, & \mathbf{W}_k &\coloneq \operatorname{diag}\left(\exp(-\mathbf{V}_k/\kappa)\right), \\
+\mathbf{R}_k &\coloneq \operatorname{diag}\left(e^{\Delta t \mathbf{r}_k/2}\right), & \mathbf{r}_k &\coloneq -\sum_{l,j} \rho_{k,j} m_j \partial_{x_l} E(x_i - x_j)^\top \frac{(\mathbf{D}_l \boldsymbol{\varphi}_k)_j}{\varphi_{k,j}}, \\
+(\mathbf{b}_{k,l})_i &\coloneq -\sum_j \partial_{x_l} E(x_i - x_j)\rho_{k,j} m_j. & &
+\end{aligned}
+\end{equation}%
+With respect to the lumped $L^2(\mathcal{D}_\Delta)$ inner product $\langle \mathbf{u}, \mathbf{v} \rangle_{M_{\text{lump}}} \coloneq \mathbf{u}^\top M_{\text{lump}}\mathbf{v}$, the discrete adjoint of the single-step backward matrix operator $\mathbf{S}_{k+1\to k} \coloneq \mathbf{R}_k \mathbf{\Pi}_k \mathbf{R}_{k+1}$ is given explicitly by
+\begin{equation}
+(\mathbf{S}_{k+1\to k})^\dagger = M_{\text{lump}}^{-1} (\mathbf{S}_{k+1\to k})^\top M_{\text{lump}} = \mathbf{R}_{k+1} \mathbf{\Pi}_k^\dagger \mathbf{R}_k,
+\end{equation}%
+where $\mathbf{\Pi}_k^\dagger \coloneq M_{\text{lump}}^{-1} \mathbf{\Pi}_k^\top M_{\text{lump}}$ due to commutation with $M_{\text{lump}}$.
 
-\end{algorithm}
+
 
 
 \bibliographystyle{plainnat}
