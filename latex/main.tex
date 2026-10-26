@@ -1,35 +1,41 @@
 \documentclass[10pt,a4paper]{article}
 
+% Page Setup (Exact same geometry)
 \usepackage[margin=2cm]{geometry}
+\pagestyle{empty} % No page numbers
+
+% Math Tools & Symbols (Duplicates removed)
 \usepackage{amsmath,amssymb,amsfonts,amsthm,mathtools,mathrsfs}
-\usepackage{mathtools}
+\usepackage{siunitx}
+
+% Graphics & Lists
 \usepackage{graphicx}
 \usepackage{enumitem}
-\usepackage{parskip}
-\usepackage{mathrsfs}
-\usepackage{siunitx}
+
+% Algorithms
 \usepackage[ruled,vlined]{algorithm2e}
 
-% \usepackage{algorithm}
-% \usepackage{algpseudocode} 
+% Bibliography / Citations
+\usepackage[numbers,sort&compress]{natbib}
 
+% Colors & Hyperlinks (Red citations, Blue equation tags)
+\usepackage{xcolor}
+\usepackage[
+    colorlinks=true,
+    citecolor=red,      % Red citations
+    linkcolor=blue      % Blue equation tags / internal links
+]{hyperref}
+
+% Theorem Environments
 \newtheorem{proposition}{Proposition}
 \newtheorem{assumption}{Assumption}
 
+% Paragraph Formatting
+\usepackage{parskip}
+\setlength{\parindent}{0pt}  % No paragraph indentation
+\setlength{\parskip}{1pt}    % Tight paragraph spacing
 
-\usepackage[numbers,sort&compress]{natbib}
-% No paragraph indentation
-\setlength{\parindent}{0pt}
-
-% No page numbers
-\pagestyle{empty}
-
-
-\usepackage[ruled,vlined]{algorithm2e}
-
-% Tighten vertical spacing strictly across all elements
-\setlength{\parskip}{1pt}
-
+% Strict Tight Spacing for Math & Algorithms
 \setlength{\topsep}{2pt}
 \setlength{\partopsep}{0pt}
 \setlength{\abovedisplayskip}{2pt}
@@ -96,7 +102,7 @@ where probability flux is $\displaystyle J( m,\alpha ) =\sqrt{2\kappa } m-\rho \
 \end{itemize}
 
 The rest of this work focus solving the following coupled FB-PDEs which can be drived in straightforward manner by mean of Lagrange Multiplier on Banach space. The difference between (PDE-opt) and that which given by \cite{Backhoff2020MeanFieldErgodic} is the extra boundary condition.
-\begin{proposition}
+\begin{proposition} \cite{Backhoff2020MeanFieldErgodic}
 The optimal control $\displaystyle \alpha ^{*} ,\rho ^{*}$ are given by $\displaystyle \alpha ^{*} =\sqrt{2\kappa } \nabla \log \varphi $ where $\displaystyle ( \phi ,\rho )\rightarrow ( \varphi ,\hat{\varphi }) \coloneq ( e^{-\phi } ,\rho \exp( E\star \rho /\kappa +\phi )$ solve the following FB-PDEs:
 \begin{equation}
 \begin{aligned}

@@ -1,58 +1,73 @@
 from pathlib import Path
+import time 
+
 
 import numpy as np 
 import scipy
+import gmsh
 
 from src.utils import *
 
-class BC: # all BC must impl : reflect, normal, and sdf
-    
+
+def solve_mfrsb(nodes, elements, geom, c: Config ): # main solver: Pichard-Sinkhorn MF-RSB problem
+    # nodes : [N, dim], ele (int) # [N, 1], 
+    fem = _FEM()
+
+
+
+class FBPDE: # main FB-PDEs 
+
     def __init__(self, c: Config):
-        self.c = c 
+        self.c = c
+        self._fem = _FEM()
+        self.record = None
         
-    def reflect(self, x): 
-        pass
+    def forward(self): pass   # time marching forward PDEs
+
+    def backward(self) : pass #vvc
+
+    def solve(self):
+        
+        print(f"=============== Initialize Solver ===============") 
+        print(f"===> Node: {self._fem.n_nodes}, Elements: {self._fem.n_eles}")
+        
+        Nt = self.c.Nt
+        for n in range(1, Nt+1): # fixed rho
+            
+            ct0 = time.time() 
+            
+            for k in range(Nt+1): # precompute fixed nonlinear quantities
+                pass 
+            
+            for k in range(self, Nt-1, -1, -1): # backward propagate varphi_hat
+                
+                pass 
+            
+            
+            for k in range(Nt): # forward propagate varphi
+                
+                pass 
+            
+        print(f"=============== Done Solver ===============")
+        
+        
     
-    def sdf(self, x):
-        # recursively call max one each _sdf
-        
-        pass 
+    
+            
+            
+            
+
 class _FEM: 
     
-    def __init__(self, c):
+    def __init__(self, nodes, ele, c: Config):
+        self.X, self.ele = nodes, ele
+        self.n_nodes, self.n_eles = len(nodes), len(ele)
+    
+    def grad(self): pass 
+    
+    def interp(self): # linear interp
+        pass  
+    
+    def path_skorokhod(self): # characteristic path with reflection at BC.
         pass
     
-    def ass(self):
-        pass 
-    
-    def grad(self):
-        pass
-    
-    def lap(self):
-        pass
-    
-class PDE: # subclass "forward, backward" to define specific PDEs
-
-    rho = None
-    vphi = None #varphi
-    mphi = None #varphi_hat
-    
-    def __init__(self, config: Config):
-        self._FEM = _FEM()
-    
-    def _forward(self): pass
-    
-    def _backward(self): pass 
-
-def approx_ept(order=2): # compute expectation : 
-    # order either 2/4/6 
-    pass 
-
-def alg_step(pde, config): # one step of the algorithm
-    pass
-
-def path_sim(pde: PDE, config: Config): # forward Euler-Maruyama scheme
-    pass
-
-def solve_mon(pde: PDE):
-    pass 
