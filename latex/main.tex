@@ -53,8 +53,39 @@ Classical \textit{Schrödinger Bridge} (SB) problem seeks a path measure that mi
 
 \section{Introduction}
 
+The random motion of microscopic particles, such as gas molecules or pollen grains suspended in a fluid, can be modeled by Brownian motion. When the number of particles is asymptotically large, it is natural to analyze their collective behavior via the evolution of their empirical distribution rather than tracking each individual path. Beyond merely predicting the passive evolution of a particle cloud, one often seeks to actively control it toward a desired target distribution—with applications ranging from particle beam focusing and swarm robotics to molecular transport and nonequilibrium thermodynamics.
 
+\paragraph{A Brief History of the Schrödinger Bridge Problem}
 
+Suppose the particle distribution is dictated by free Brownian diffusion, but an observed terminal distribution differs significantly from the theoretical diffusion prediction. Such an observation constitutes a rare event, raising a fundamental question: \textit{which stochastic evolution is the most probable one?} This question lies at the heart of the \textit{Schrödinger Bridge} (SB) problem. In his seminal 1931 work \textit{Über die Umkehrung der Naturgesetze}~\cite{Schrodinger1931Umkehrung}, Erwin Schrödinger posed:
+\vspace{0.4cm}
+\begin{quote}
+\small \textit{
+"Imagine that you observe a system of diffusing particles in thermal
+equilibrium. Suppose at time $t_0$ their distribution is more or less
+uniform and that at a later time $t_1>t_0$ you find a significant
+spontaneous deviation from this uniformity. You are asked to explain how
+this deviation occurred. What is its most likely behavior?"
+}
+\end{quote}
+\vspace{0.4cm}
+Using the large deviation principle, Föllmer~\cite{histFollmer1988} rigorously formulated this heuristic in a modern measure-theoretic framework as a relative entropy minimization between path measures subject to prescribed initial and endpoint marginals, recovering the classical Schrödinger Bridge minimization:
+\begin{equation} \label{eq:classicSB}
+    \mathcal{J}_{\text{SB}}^{*} \coloneq \inf_{\substack{\mathbb{Q} \in \mathscr{P}(\Omega) \\ \mathbb{Q}_0 = \mu_{\text{init}}, \; \mathbb{Q}_T = \mu_{\text{targ}}}} 
+    H[\mathbb{Q} \parallel \mathbb{P}]
+\end{equation}
+
+A related static interpolation problem appeared centuries earlier in Gaspard Monge's 1781 formulation of optimal transport (OT). By the Benamou--Brenier dynamic formulation~\cite{benamou_computational_2000}, SB can be understood as the entropic regularization of dynamic OT~\cite{connectLeonard2012, reviewChen2021}. In the vanishing diffusion limit ($\kappa \to 0$), the solution of the SB problem converges directly to displacement interpolation in dynamic OT~\cite{Mikami2004, Kato2026}.
+
+Furthermore, \eqref{eq:classicSB} can be recast as a stochastic optimal control (SOC) problem subject to controlled stochastic differential equations (SDEs)~\cite{PavonWakolbinger1991, reviewChen2021, reviewLeonard2014}. The associated optimality system links a backward Hamilton--Jacobi--Bellman (HJB) PDE for the value function with a forward Fokker--Planck (FP) PDE for the probability density, yielding a coupled system of forward-backward PDEs (FB-PDEs).
+
+\paragraph{From Classical SB to Reflected Mean-Field Dynamics}
+
+Crucially, classical SB presumes that particles evolve freely across the entire Euclidean space $\mathbb{R}^d$ without spatial or geometric constraints. However, in many physical scenarios—from molecular transport within cellular organelles to colloidal suspensions in microfluidic channels—the admissible state space is bounded and restricted by physical boundaries. Standard Brownian motion is no longer applicable, as unconstrained trajectories would exit the physical domain. To resolve this, one must incorporate normal boundary reflections, modeling the underlying dynamics as a reflected Itô-diffusion governed by McKean--Skorokhod SDEs on a bounded domain $\mathcal{D} \subset \mathbb{R}^d$.
+
+At the same time, in interacting particle systems and thermodynamic ensembles, microscopic particles often interact through non-local spatial forces (e.g., inter-particle attraction, steric repulsion, or pair potentials). This gives rise to the Mean-Field Schrödinger Bridge (MFSB) problem~\cite{meanfield_Benamou2019EntropyMFG, meanfield_Backhoff2020}, where the state dynamics depend on non-local spatial convolutions $(\nabla E \star \rho_t)$. Combining spatial reflection constraints with non-local mean-field interactions yields the Reflected Mean-Field Schrödinger Bridge (MFRSB) problem—a highly non-linear, non-convex system of forward-backward PDEs with no-flux Neumann boundary conditions that demands specialized numerical treatment.
+
+Beyond its physical foundations, the Schrödinger Bridge framework has recently gained significant traction in machine learning, generative modeling, biological cell trajectory inference, and multi-agent swarm control~\cite{zhang2025modeling, gushchin2024light, wang2021deep}.
 \section{Related Works}
 
 Interest in spatially-constrained SB is largely under-developed, especially when also incorporating mean-field framework. This work is inspired by \cite{Caluya2020ReflectedBridge, Eldesoukey2026MeanFieldSinkhorn}. First paper studies SB with reflected dynamic with Sinkhorn iterate where the time marching solution involve Neuman and Rudin boundary conditions, and show great performance in low-dimension. The latter generalized standard Sinkhorn to accept partial-integro-PDEs associated with mean-field SB resulting in nested version. Along this line \cite{Adu2026ReflectedSchrodinger} studies degenerate, sub-Riemannian dynamics, and use Sinkhorn simiarl to the former. Recent work \cite{LiuKalise2026} use Finite element discretization to solve the weak form of coupled PDEs for reflected SB. \cite{Deng2024ReflectedGenerative} derives forward-backward SDEs associated coupled FB-PDEs of reflected SB and extend divergence-based likelihood training in smooth bounded domain and shown to scale in high-dimension. Discrete-time framework also been explored with chance-constrants \cite{Rapakoulias2023DiscreteCovariance, Rapakoulias2025MeanFieldGMM} with mixture of Guassian marginal contraints. Alternative method such as introducing direct soft-penalty for particle escaping region exists as demonstrated in \cite{Liu2022DeepGSB} using FB-SDE representation. There is a direct link between system of optimality of SB and MFG, therefore one can naturally adopt a scheme in MFG such as finite-difference to solve SB problem. \cite{CalzolaCarliniDupuisSilva2023, CarliniCoscetti2026, CarliniSilva2013} adopt a semi-lagrangian approach. 
@@ -102,6 +133,8 @@ where probability flux is $\displaystyle J( m,\alpha ) =\sqrt{2\kappa } m-\rho \
 \end{itemize}
 
 The rest of this work focus solving the following coupled FB-PDEs which can be drived in straightforward manner by mean of Lagrange Multiplier on Banach space. The difference between (PDE-opt) and that which given by \cite{Backhoff2020MeanFieldErgodic} is the extra boundary condition.
+
+\vspace{0.4cm}
 \begin{proposition} \cite{Backhoff2020MeanFieldErgodic}
 The optimal control $\displaystyle \alpha ^{*} ,\rho ^{*}$ are given by $\displaystyle \alpha ^{*} =\sqrt{2\kappa } \nabla \log \varphi $ where $\displaystyle ( \phi ,\rho )\rightarrow ( \varphi ,\hat{\varphi }) \coloneq ( e^{-\phi } ,\rho \exp( E\star \rho /\kappa +\phi )$ solve the following FB-PDEs:
 \begin{equation}
@@ -126,7 +159,7 @@ where $\displaystyle \mathcal{A}^{\rho }[ \eta ] \coloneq ( \nabla E\star \rho )
 The constructive scheme for the PDE-opt solver is obtained via a single-loop Picard-Sinkhorn iteration to find the fixed point of the flow $\rho = (\rho_t)_{t\in\mathcal{T}} \in \mathcal{C}(\mathcal{T}\mathscr{P}(\mathcal{D}))$. We define the marginal map $F$ and the inner propagator $G$ by
 \begin{equation}
 \begin{aligned}
-F[\rho; \varphi, \hat{\varphi}] \coloneq W[\rho]\varphi\hat{\varphi} \quad \text{and} \quad G[\varphi_T; \mu, \varphi, \hat{\varphi}] \coloneq \left( M_T^{\mu} \mathcal{S}_{0\to T}^{\dagger, \mu, \hat{\varphi}} \circ M_0^{\mu} \mathcal{S}_{T\to 0}^{\mu, \varphi} \right)[\varphi_T].
+F[\rho; \varphi, \hat{\varphi}] \coloneq W[\rho]\varphi\hat{\varphi} \quad \text{and} \quad G[\varphi_T; \mu, \varphi, \hat{\varphi}] \coloneq \left( M_T^{\mu} \circ \mathcal{S}_{0\to T}^{\dagger, \mu, \hat{\varphi}} \circ M_0^{\mu} \circ \mathcal{S}_{T\to 0}^{\mu, \varphi} \right)[\varphi_T].
 \end{aligned}
 \end{equation}%
 The propagator $G$ shares a very similar structure with the classical linear Schrödinger bridge (SB), which is a well-studied numerical method~\cite{Chen2021SinkhornReview, leonard2012from}. Here, $\mathcal{S}_{0\to T}^{\dagger, \mu, \hat{\varphi}}$ and $\mathcal{S}_{T\to 0}^{\mu, \varphi}$ are respectively the backward and forward time-split propagators of the linearized PDE-opt system frozen at $(\mu, \varphi, \hat{\varphi})$. The term ``linearized PDEs'' refers to the fact that under fixed $(\rho^{n-1}, \varphi^{n-1}, \hat{\varphi}^{n-1})$, both the nonlocal drift $b_t^{n-1} \coloneq -\nabla E \ast \rho_t^{n-1}$ and the reaction rate $r_t^{n-1} \coloneq -\nabla E \ast (\rho_t^{n-1} \nabla \log \varphi_t^{n-1}) \in L^\infty(\mathcal{D})$ are frozen in time and space, reducing the nonlinear forward-backward PDEs to standard non-autonomous linear Cauchy problems with the time-varying generator $\mathcal{A}_t^{n-1} + \mathcal{R}_t^{n-1}$. It follows that this generator induces a unique backward evolution family $(\mathcal{P}_{t\to s}^{n-1})_{0 \leqslant s \leqslant t \leqslant T}$ on $L^2(\mathcal{D})$; see also~\cite{BatkaiCsomosFarkasNickel2011}. Here, $M_T^{\mu}$ and $M_0^{\mu}$ are Sinkhorn scaling operators defined pointwise by
@@ -233,8 +266,17 @@ With respect to the lumped $L^2(\mathcal{D}_\Delta)$ inner product $\langle \mat
 \end{equation}%
 where $\mathbf{\Pi}_k^\dagger \coloneq M_{\text{lump}}^{-1} \mathbf{\Pi}_k^\top M_{\text{lump}}$ due to commutation with $M_{\text{lump}}$.
 
+\section{Results}
 
+% \section{Supplemental}
 
+% \subsection{Implementation Details}
+
+% \subsection{Backgroud Materials}
+
+% \subsubsection{Classical SB problem}
+
+% \subsubsection{Fixed-Point arguments }
 
 \bibliographystyle{plainnat}
 \bibliography{references}
