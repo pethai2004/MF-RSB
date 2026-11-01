@@ -32,19 +32,6 @@ class Config:
     
     seed = 42
     
-@dataclass
-class MetaHist:
-
-    rho_diff : np.ndarray # [Nt, 1]
-    marg_err_0 : np.ndarray # [Nt, 1]
-    marg_err_1 : np.ndarray 
-    penetration: np.ndarray
-    avg_penetration : np.ndarray
-    max_penetration : np.ndarray
-    
-    fields_norm : np.ndarray # (Nt, 3)  # each sols norm : rho, varphi, varphi hat 
-    fields_grad_norm : np.ndarray # (Nt, 3) # each sols grad norm 
-    
 def write_sol(field, path): # write field variable [n_times, n_space, dim] 
     if field.dim == 2: # assuming this is [n_space, dim] 
         field = field[None, ...] # add extra 
