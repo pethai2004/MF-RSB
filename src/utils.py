@@ -1,6 +1,8 @@
 
 from dataclasses import dataclass
+import matplotlib
 import numpy as np
+from numpy import ndarray
 import gmsh
 
 import matplotlib.pyplot as plt
@@ -70,105 +72,97 @@ def save_snapshot2d(field, domain, save_path, n_shots=9, smooth=False):
 def path_sim(pde, config: Config): # forward Euler-Maruyama scheme
     pass
 
+# @dataclass
+# class E: 
+#     gamma : float = .02
+#     sigma : float = .3
+#     block : int = 256
+    
+#     def field(self, mesh, rho, logphi, kappa): return np.zeros(mesh.N)
+
+
+def plot_mesh2d(nodes, ele, figsize=(12, 6)): # "workable"
+    triang = matplotlib.tri.Triangulation(nodes[:, 0], nodes[:, 1], ele)
+
+    fig, ax = plt.subplots(figsize=figsize)
+    ax.triplot(triang, color="red", markersize=1.5, linewidth=0.1, 
+            marker=".", markerfacecolor="blue")
 
 ############################ Domain Mesh Generation ########################
 
-# this part is AI-generated
-def _extract_mesh_2d():
-    tags, coords, _ = gmsh.model.mesh.getNodes()
-    nodes = coords.reshape(-1, 3)[:, :2]
-    tag_map = {int(t): i for i, t in enumerate(tags)}
-    elem_types, _, connectivity = gmsh.model.mesh.getElements(dim=2)
-    tri_idx = next(i for i, t in enumerate(elem_types) if t == 2)
-    triangle_tags = connectivity[tri_idx].reshape(-1, 3)
-    elements = np.array([[tag_map[int(t)] for t in tri] for tri in triangle_tags], dtype=int)
+# copied from Gemini
+def build_dom_example(bounds, circles, rounded_rects, h_min=0.028, h_max=0.040):
+    gmsh.initialize()
+    gmsh.option.setNumber("General.Terminal", 0)
+    occ = gmsh.model.occ
+
+    xmin, xmax, ymin, ymax = bounds
+    outer_tag = occ.addRectangle(xmin, ymin, 0.0, xmax - xmin, ymax - ymin)
+    holes = []
+
+    for (cx, cy), r in circles:
+        holes.append((2, occ.addDisk(cx, cy, 0.0, r, r)))
+
+    for rx0, rx1, ry0, ry1, rf in rounded_rects:
+        cx = 0.5 * (rx0 + rx1)
+        cy = 0.5 * (ry0 + ry1)
+        hx = max(0.0, 0.5 * (rx1 - rx0) - rf)
+        hy = max(0.0, 0.5 * (ry1 - ry0) - rf)
+
+        parts = []
+        if hx > 1e-8 and hy > 1e-8:
+            parts.append((2, occ.addRectangle(cx - hx, cy - hy - rf, 0.0, 2.0 * hx, 2.0 * (hy + rf))))
+            parts.append((2, occ.addRectangle(cx - hx - rf, cy - hy, 0.0, 2.0 * (hx + rf), 2.0 * hy)))
+            for sx in (-1.0, 1.0):
+                for sy in (-1.0, 1.0):
+                    parts.append((2, occ.addDisk(cx + sx * hx, cy + sy * hy, 0.0, rf, rf)))
+        elif hx > 1e-8:
+            parts.append((2, occ.addRectangle(cx - hx, cy - rf, 0.0, 2.0 * hx, 2.0 * rf)))
+            parts.append((2, occ.addDisk(cx - hx, cy, 0.0, rf, rf)))
+            parts.append((2, occ.addDisk(cx + hx, cy, 0.0, rf, rf)))
+        elif hy > 1e-8:
+            parts.append((2, occ.addRectangle(cx - rf, cy - hy, 0.0, 2.0 * rf, 2.0 * hy)))
+            parts.append((2, occ.addDisk(cx, cy - hy, 0.0, rf, rf)))
+            parts.append((2, occ.addDisk(cx, cy + hy, 0.0, rf, rf)))
+        else:
+            parts.append((2, occ.addDisk(cx, cy, 0.0, rf, rf)))
+
+        if len(parts) > 1:
+            fused, _ = occ.fuse([parts[0]], parts[1:])
+            holes.extend(fused)
+        else:
+            holes.extend(parts)
+
+    if holes:
+        occ.cut([(2, outer_tag)], holes)
+
+    occ.synchronize()
+    gmsh.option.setNumber("Mesh.MeshSizeMin", h_min)
+    gmsh.option.setNumber("Mesh.MeshSizeMax", h_max)
+    gmsh.option.setNumber("Mesh.Algorithm", 6)
+    gmsh.model.mesh.generate(2)
+
+    node_tags, coords, _ = gmsh.model.mesh.getNodes()
+    all_nodes = coords.reshape(-1, 3)[:, :2]
+    tag_to_index = {tag: i for i, tag in enumerate(node_tags)}
+
+    elem_types, _, node_indices = gmsh.model.mesh.getElements(dim=2)
+    primary_type = elem_types[0]
+    _, _, _, num_nodes, _, _ = gmsh.model.mesh.getElementProperties(primary_type)
+    element_node_tags = node_indices[0].reshape(-1, num_nodes)
+    raw_elements = np.vectorize(tag_to_index.get)(element_node_tags)
+    gmsh.finalize()
+
+    used_nodes, inverse_idx = np.unique(raw_elements, return_inverse=True)
+    nodes = all_nodes[used_nodes]
+    elements = inverse_idx.reshape(raw_elements.shape)
+
+    x0 = nodes[elements[:, 0]]
+    x1 = nodes[elements[:, 1]]
+    x2 = nodes[elements[:, 2]]
+    detJ = (x1[:, 0] - x0[:, 0]) * (x2[:, 1] - x0[:, 1]) - (x2[:, 0] - x0[:, 0]) * (x1[:, 1] - x0[:, 1])
+    cw_mask = detJ < 0.0
+    if np.any(cw_mask):
+        elements[cw_mask, 1], elements[cw_mask, 2] = elements[cw_mask, 2].copy(), elements[cw_mask, 1].copy()
+
     return nodes, elements
-
-def superellipse(cx, cy, a, b, power=6, n=160):
-    t = np.linspace(0, 2 * np.pi, n, endpoint=False)
-    q = 2.0 / power
-    return np.column_stack([cx + a * np.sign(np.cos(t)) * np.abs(np.cos(t))**q, cy + b * np.sign(np.sin(t)) * np.abs(np.sin(t))**q])
-
-def smooth_boundary(vertices, sigma=0.025, n=600):
-    vertices = np.asarray(vertices, float)
-    closed = np.vstack([vertices, vertices[0]])
-    lengths = np.linalg.norm(np.diff(closed, axis=0), axis=1)
-    s = np.r_[0, np.cumsum(lengths)]
-    perimeter = s[-1]
-    t = np.linspace(0, perimeter, n, endpoint=False)
-    sampled = np.column_stack([np.interp(t, s, closed[:, j]) for j in range(2)])
-    sampled = gaussian_filter1d(sampled, sigma=sigma * n / perimeter, axis=0, mode="wrap")
-    knots = np.r_[t, perimeter]
-    curve = np.vstack([sampled, sampled[0]])
-    splines = [CubicSpline(knots, curve[:, j], bc_type="periodic") for j in range(2)]
-    return np.column_stack([f(t) for f in splines])
-
-def _add_spline_loop(geo, xy, h, segments=8):
-    xy = np.asarray(xy, float)
-    n, step = len(xy), len(xy) // segments
-    pts = [geo.addPoint(x, y, 0, h) for x, y in xy]
-    curves = [geo.addSpline([pts[(k * step + j) % n] for j in range(step + 1)]) for k in range(segments)]
-    return geo.addCurveLoop(curves)
-
-def make_dom_1(n=201):
-    nodes = np.linspace(-1, 1, n)
-    mesh = MeshLine(nodes[None, :])
-    nodes, elements = mesh.p.T, mesh.t.T
-    x = nodes[:, 0]
-    g = lambda mu, s: np.exp(-0.5 * ((x - mu) / s)**2)
-    rho0 = g(-0.7, 0.12)
-    rhoT = (g(-0.5, 0.12) + g(0.0, 0.12) + g(0.5, 0.12)) / 3.0
-    mass = np.zeros(len(nodes))
-    np.add.at(mass, elements.ravel(), np.repeat(np.abs(np.diff(nodes[elements], axis=1)).ravel() / 2, 2))
-    return nodes, elements, rho0 / (mass @ rho0), rhoT / (mass @ rhoT)
-
-def make_dom_2(h=0.04):
-    gmsh.initialize()
-    gmsh.option.setNumber("General.Terminal", 0)
-    try:
-        gmsh.model.add("maze")
-        geo = gmsh.model.geo
-        outer = _add_spline_loop(geo, superellipse(2.0, 1.0, 2.0, 1.0, power=8), h)
-        walls = [(0.8, 0.81, 0.075, 0.73), (1.6, 1.19, 0.075, 0.73), (2.4, 0.81, 0.075, 0.73), (3.2, 1.19, 0.075, 0.73)]
-        holes = [_add_spline_loop(geo, superellipse(cx, cy, a, b, power=4, n=120), h) for cx, cy, a, b in walls]
-        geo.addPlaneSurface([outer] + holes)
-        geo.synchronize()
-        gmsh.model.mesh.generate(2)
-        nodes, elements = _extract_mesh_2d()
-    finally:
-        gmsh.finalize()
-    mesh = MeshTri(nodes.T, elements.T)
-    nodes, elements = mesh.p.T, mesh.t.T
-    g = lambda mu: np.exp(-np.sum((nodes - mu)**2, axis=1) / (2 * 0.12**2))
-    rho0, rhoT = g([0.30, 1.65]), g([3.70, 0.35])
-    v = nodes[elements]
-    J = np.stack([v[:, 1] - v[:, 0], v[:, 2] - v[:, 0]], axis=-1)
-    mass = np.bincount(elements.ravel(), weights=np.repeat(np.abs(np.linalg.det(J)) / 6, 3), minlength=len(nodes))
-    return nodes, elements, rho0 / (mass @ rho0), rhoT / (mass @ rhoT)
-
-def make_dom_3(h=0.04):
-    gmsh.initialize()
-    gmsh.option.setNumber("General.Terminal", 0)
-    try:
-        gmsh.model.add("smooth_obstacles")
-        geo = gmsh.model.geo
-        outer_pts = [geo.addPoint(x, y, 0, h) for x, y in [(0, 0), (4, 0), (4, 1), (0, 1)]]
-        lines = [geo.addLine(outer_pts[i], outer_pts[(i + 1) % 4]) for i in range(4)]
-        outer_loop = geo.addCurveLoop(lines)
-        circle_pts = superellipse(0.85, 0.50, 0.3, 0.3, power=2, n=120)
-        L_pts = smooth_boundary([[1.7, 0.1], [2.3, 0.1], [2.3, 0.4], [2.0, 0.4], [2.0, 0.8], [1.7, 0.8]], sigma=0.025)
-        L_up_pts = smooth_boundary([[2.8, 0.1], [3.1, 0.1], [3.1, 0.5], [3.4, 0.6], [3.4, 0.7], [2.8, 0.7]], sigma=0.025)
-        hole1 = _add_spline_loop(geo, circle_pts, h)
-        hole2 = _add_spline_loop(geo, L_pts, h)
-        hole3 = _add_spline_loop(geo, L_up_pts, h)
-        geo.addPlaneSurface([outer_loop, hole1, hole2, hole3])
-        geo.synchronize()
-        gmsh.model.mesh.generate(2)
-        nodes, elements = _extract_mesh_2d()
-    finally:
-        gmsh.finalize()
-    x, y = nodes.T
-    rho0 = ((0.1 <= x) & (x <= 0.5) & (0.6 <= y) & (y <= 0.9)).astype(float) / (0.4 * 0.3)
-    g2d = lambda mu, var: np.exp(-0.5 * np.sum((nodes - mu)**2 / var, axis=1)) / (2 * np.pi * np.sqrt(np.prod(var)))
-    rhoT = 0.6 * g2d([3.60, 0.18], [0.015, 0.002]) + 0.4 * g2d([3.85, 0.22], [0.008, 0.003])
-    return nodes, elements, rho0, rhoT

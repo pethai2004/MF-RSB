@@ -1,44 +1,72 @@
-import argparse
+
+import time, os, argparse
 
 from core import *
 from utils import *
 
-
-# Trial 1: two-dim on rectangular BC, with inside 2 circles and 3 boxes. Starting from 2 mixture of 
-# Gaussian to uniform over [a, b]^2
-class Trial1:
-    def run(self): pass 
+T = 1.
 
 
-
-
-# Trial 2: one-dim on [-1, 1] initial marginal being Gaussian N(0,1)  to endpoint mixture of Guassian
-
-class Trial2:
-    def run(self): pass 
-
-
-
-## Trial 3: 2d more complex domain maze example
-
-class Trial3:
-    def run(self): pass 
-
-
-####################################### Params change Trial #######################################
-
-# Trial A.1: 1d or/and 2d convergence test as individually 
-#    inc x ->0, inc t -> 0 , and then simultaneously (inc x, inc t) ->0 (maybe dependent on each other)
-
-
-
-
-
-# Trial A.2 Random parameter change for SL / FEM / Solver
+# T0 (1d-proof of concept) on [-1, 1], with Gaussian marginal different in means and variance. 
 
 
 
 
 
 
-# run argparse here for each trial
+# T1 : [Illustrative test] 2-dim, with 3x3 snapshots, initial and endpoint marginals b
+# eing mixture of Gaussian and uniform over rectangular box
+
+
+
+
+
+
+
+
+
+
+# T2 : [Ops Splitting : Lie-Trotter, Strang (mine), and Yosida (possibly failed, include it anyway)]
+
+
+def run_trial_2():
+    pass
+
+
+
+
+
+
+
+
+# T3 : [Convergence with 1: meshX -> 0, 2: mesht->0, and simultaneously (meshX, mesht)->0]
+
+
+def run_trial_3():
+    time_seqs = [T/10, T/20, T/40, T/80, T/160]
+    h_max = [0.16, 0.08, 0.04, 0.02, 0.01]
+
+    for delT, delX in zip(time_seqs, h_max):
+        # use same solver but loop only once?? 
+        pass 
+
+
+
+
+
+
+
+# T4 : Asymptotic Reduction for b=0, sigma->0, E=0
+
+
+
+def run_trial_4():
+    pass
+
+
+
+
+
+
+
+# T5 : 

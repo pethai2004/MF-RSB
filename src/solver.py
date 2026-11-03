@@ -1,5 +1,3 @@
-
-
 import time 
 
 import numpy as np 
@@ -9,26 +7,27 @@ import gmsh
 from src.utils import *
 from src.core import *
 
-
-def solve_mfrsb(mesh: Mesh, funcE, stencil, c: Config): # impl nested Fixed-point recursion loop in Alg 1
+# impl nested Fixed-point recursion loop in Alg 1
+def solve_mfrsb(mesh: Mesh, E: Ekern, SL : Stenc, c: Config): 
     
     # initialization 
     dt = c.T/c.Nt 
-    E = None 
     mu0, muT = None, None 
     rho = np.full((c.Nt+1, mesh.N), 1/mesh.mass.sum()) # uniform
     f, h = np.zeros_like(rho, c.dtype), np.zeros_like(rho, c.dtype) # f=log(phi), g=log(phi_hat)
     
-    # meta = MetaSolver() # mornitor: mass conservation, value near boundary, max/min value of rho, phi, varphi, 
-    
+    # meta = { # A
+    #     "rho_diff" : [], "mu0_err" : [], "muT_err" : [], "max_pnt" : [], "EOC" :[],
+    #     "err_adj" : [], "CPU_time_n" : [], "contract_fact" : [], "AT" : [], "A0T" : []
+    # }
     for n in range(1, c.N_iter+1):
         
         ## (1) precompute fixed quantities 
         ops = []
         logW, r, b = np.empty_like(rho), np.empty_like(rho), np.empty((*rho.shape, c.dim))
         for k in range(c.Nt+1):
-            logW, r, b = funcE.field(mesh, rho[k], f[k], c.kappa)
-            ops += [stencil.build(mesh, b[k], dt, c.kappa)]
+            logW, r, b = E.field(mesh, rho[k], f[k], c.kappa)
+            ops += [SL.build(mesh, b[k], dt, c.kappa)]
         ops = ops[:-1] # remove extra ops
         
         # (2) operator G in for fixed rho^n
@@ -56,6 +55,4 @@ def solve_mfrsb(mesh: Mesh, funcE, stencil, c: Config): # impl nested Fixed-poin
 
         
     
-    return 
-            
-            
+
