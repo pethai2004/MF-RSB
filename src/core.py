@@ -7,6 +7,7 @@ from numpy import linalg
 import matplotlib
 import scipy
 from scipy.sparse import csr_matrix
+from scipy.special import logsumexp
 import gmsh
 
 from src.utils import *
@@ -170,15 +171,15 @@ class SLStenc0: # 3-branches SL-stencil for approximate ops U
     
     x0 : np.ndarray # traceback characteristic point
     x1 : np.ndarray # landing point node
-    w : np.ndarray # weights
+    w : np.ndarray # weights (log)
     mass : np.ndarray 
     pent : int = 0
     
     def __post_init__(self):
         keep=(self.w > 1e-14) # filter out small weights
         self.x0, self.x1, self.w = self.x0[keep], self.x1[keep], self.w[keep]
-        self.lgweight = np.log(self.w)
-        self.lgmass = np.log(self.mass)
+        self.lgw = np.log(self.w)
+        self.lgm= np.log(self.mass)
         self.n = len(self.mass)
         row = np.bincount(self.x0, self.w, self.n)
         self.row_err = float(np.max(np.abs(row-1.))) #
@@ -201,6 +202,21 @@ class SLStenc0: # 3-branches SL-stencil for approximate ops U
             y_tilds += [vert.ravel]
             ws += [(p*beta).ravel()]
         return cls(*(np.concatenate(X) for X in [ys, y_tilds, ws]), mesh.mass, count)
+    
+    # [TODO] put check assertion with direct matrix-vector product
+    def feyn_bwd(self, logv): # sum_{e: i_e=i} w_e * varphi_{j_e} 
+        out = np.full(self.n, -np.inf)
+        for e, source in enumerate(self.x0): # try more efficient: np.logadexp.at(out, self.x0, self.lgw + logv[self.x1])
+            out[source] = np.log(np.exp(out[source] + np.exp(
+                    self.lgw[e] + logv[self.x1[e]])
+        ))
+        return out
+    
+    def feyn_fwd(self, logv):
+        
+        out = np.full(self.n, -100.)
+        np.logaddexp.at(out, self.x1, self.lgw+self.lgm[self.x0]+logv[self.x0])
+        return - self.lgm + out
     
 @dataclass 
 class Ekern: # interaction kernel E (implement entire drift b(t,x,rho_t))
@@ -226,6 +242,54 @@ class Ekern: # interaction kernel E (implement entire drift b(t,x,rho_t))
         r = -np.einsum('ijd, tj,tjd->ti', self.dE, rho_mass, rel_grad)
         # try clipping, but stay like this [TODO]
         return logW, b, r
+
+
+
+def solve_mfrsb(mesh: Mesh, E: Ekern, SL : SLStenc0, c: Config): 
+    
+    # initialization 
+    dt = c.T/c.Nt 
+    lgmu0, lgmuT = np.log(None), np.log(None) 
+    rho = np.full((c.Nt+1, mesh.N), 1/mesh.mass.sum()) # uniform
+    f, h = np.zeros_like(rho, c.dtype), np.zeros_like(rho, c.dtype) # f=log(phi), g=log(phi_hat)
+    
+    # meta = { # A
+    #     "rho_diff" : [], "mu0_err" : [], "muT_err" : [], "max_pnt" : [], "EOC" :[],
+    #     "err_adj" : [], "CPU_time_n" : [], "contract_fact" : [], "AT" : [], "A0T" : []
+    # }
+    for n in range(1, c.N_iter+1):
+        
+        ## (1) precompute fixed quantities 
+        ops: list[SLStenc0] = []
+        logW, r, b = np.empty_like(rho), np.empty_like(rho), np.empty((*rho.shape, c.dim))
+        for k in range(c.Nt+1):
+            logW, r, b = E.field(mesh, rho[k], f[k], c.kappa)
+            ops += [SL.build(mesh, b[k], dt, c.kappa)]
+        ops = ops[:-1] # remove extra ops
+        
+        fn, hn = np.empty_like(f), np.empty_like(h)
+        
+        fn[-1] = f[-1]
+        for k in range(len(SL)-1, -1,-1):
+            f[k] = .5*dt*r[k] + \
+                    ops[k].feyn_bwd(f[k+1] + \
+                    .5*dt*r[k+1])
+        h[0] = lgmu0 - logW[0] - fn[0]
+        
+        for k, op in enumerate(ops):
+            h[k+1] = .5*dt*r[k+1] + \
+                    op.feyn_fwd(h[k] + \
+                    .5*dt*r[k])
+        f[-1] = lgmuT - logW[-1] - hn[-1]
+        
+        # main Fixed-point updates
+        logrho = logW + fn + hn
+        logz =  logsumexp(logrho + np.log(mesh.mass)[None, :], axis=1, keepdim=True)
+        rho_half = np.exp(logrho - logz)
+        rho_next = (1. - c.theta) * rho + c.theta * rho_half
+        
+        # # diagnostic
+        # rho_diff = float(np.max(abs(rho_next - rho_half)))
 
 
 

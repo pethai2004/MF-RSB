@@ -1,4 +1,4 @@
-
+import os
 from dataclasses import dataclass
 import matplotlib
 import numpy as np
@@ -11,74 +11,32 @@ from scipy.interpolate import CubicSpline
 from scipy.ndimage import gaussian_filter1d
 from skfem import MeshLine, MeshTri
 
-@dataclass
-class Config:
+@dataclass 
+class Experiment: # handle all test config, mornitoring, save results, verbose, etc
     
-    dtype = np.float32
+    path: str = './trial'
+    dim: int = 2 # only support 2 for now
+    seed: int = 42
     
-    dim = 1
-    T = 1.
-    mesh = (25, ), # mush be len(mesh) == dim
-    Nt = 20,
-    kappa = .03
+    kappa: float = .03 # diffusion -> sigma = sqrt(2*kappa)
+    gamma: float = .02 # iteracting kernel strength
     
-    order_ept = 2
-    splitting = 'Strang' # Strang / Lie / Yosida
-    ln_solver = None # matrix solver ? including this??
-    N_iter = 30 
-    theta = 0.65
-    tol = 1e-5
-    kern_gamma = 0.02,
-    quite = False 
-    output_prefix = './trial'
+    N_iter: int  = 30 # max fixed-point iteration
+    tol: float = 1e-5 # fixed-point tolerate break
     
-    seed = 42
     
-def write_sol(field, path): # write field variable [n_times, n_space, dim] 
-    if field.dim == 2: # assuming this is [n_space, dim] 
-        field = field[None, ...] # add extra 
+    def __post_init__(self):
+        os.makedirs(self.path)
 
-def read_field(path):
-    pass
+    def export(self, ): 
+        pass 
+    
+    def add(self, n, X):
+        pass 
 
 
-def read_geom(path): # load predefined nodes and element
-    pass 
-
-def render_2evo_gif(field, domain, save_path, smooth=False): # save gif of field [n_times, n_space, dim]
-    # this render as 3-d with z axis being field value
-    pass
-
-def save_snapshot2d(field, domain, save_path, n_shots=9, smooth=False):
-    # save 2d snapshot to grid
-    pass
-
-    
-# def compute_reflect(x):
-#     return 
-
-# def compute_normal(x, sdf_fn,eps=1e-6): 
-#     # [Ns, dim=1,2,3] -> [N, dim],  central diff for nabla chi / ||nabla chi||
-#     chi = sdf_fn(x) 
-#     grad = np.zeros_like(chi)
-#     for i in range(x.shape[-1]):
-#         dx = np.zeros_like(chi)
-#         dx[:,i] = eps 
-#         grad[:,i] = ((sdf_fn(chi+dx)-sdf_fn(chi-dx)) / (2*eps)) # central diff 
-#     return grad / (np.max(np.linalg.norm(grad, axis=1, keepdims=True), 1e-12))
-    
         
 
-def path_sim(pde, config: Config): # forward Euler-Maruyama scheme
-    pass
-
-# @dataclass
-# class E: 
-#     gamma : float = .02
-#     sigma : float = .3
-#     block : int = 256
-    
-#     def field(self, mesh, rho, logphi, kappa): return np.zeros(mesh.N)
 
 
 def plot_mesh2d(nodes, ele, figsize=(12, 6)): # "workable"
