@@ -1,45 +1,66 @@
 from dataclasses import dataclass, field
-from typing import List, Tuple
+from typing import List, Tuple, Callable
 import time 
 
 import numpy as np 
-from numpy import linalg
+from numpy import linalg, ndarray, exp, log
 import matplotlib
 import scipy
 from scipy.sparse import csr_matrix
 from scipy.special import logsumexp
-import gmsh
+
 
 from src.utils import *
 
+dim = 2 # [TODO : implement dim = 1 and 3 ?]
+
+@dataclass
+class Config:
+    
+    name_path: str = '../assets/Trial'
+    T: float = 1.
+    Nt: int = 40 # num temporal grid
+    h_min : float = .28
+    h_max : float = .4
+    kappa: float = .05 # sigma = sqrt(2 * kappa)
+    gamma: float = .02 # interaction stength
+    sigma: float = .35 # not diffusion coef, is for Gaussian interaction
+    N_iter: int = 30 
+    tol: float = 1e-5
+    theta: float = .65 # damping 
+    splitting: str = "strang" # or lie, yoshida ? 
+    seed: int = 555
+    
 @dataclass
 class DOM: # (maybe [TODO]: other outer boundary such as hexagon/curve)
     n_resolves : int =3
-    bounds : tuple[int] = (-2, 2, -1, 1) # [x0, x1, y0, y1]
+    bounds : Tuple[float] = (-2, 2, -1, 1) # [x0, x1, y0, y1]
     
     def _sdf_gradchi(self, x, dists, glists) : return dists, glists
     
     def sdf_gradchi(self, x: ndarray): 
         # compute SDF and its gradients, x: [num, dim=2] 
-        assert x.ndim==2
+        assert x.ndim==dim
         dists, grads = [], []
         dists += [x[:,0]-self.bounds[0], self.bounds[1]-x[:,0], # l,r,b,t
                 x[:,1]-self.bounds[2], self.bounds[3]-x[:,1]]
         wall_grads = np.array([[1,0], [-1,0], [0,1],[0,-1]], float)
-        grads = [np.broadcast_to(wall_grads[i], (x.shape[0], 2)).copy() 
-                    for i in range(4)] # dim=2
+        grads = [np.broadcast_to(wall_grads[i], (x.shape[0], dim)).copy() 
+                    for i in range(4)]
+        
         dists, grads = self._sdf_gradchi(x, dists, grads) # downstream impl
         dists = np.column_stack(dists) # [N=x.shape[0], num "obs pieces"] 
         #e.g. 3circles with 2 rects will give 1+1+4+4 final dim
         minidx = dists.argmin(1) # closest piece obs
         chi = dists[np.arange(x.shape[0]), minidx]
         
-        grad_chi = np.zeros((x.shape[0], 2)) # dim=2
+        grad_chi = np.zeros((x.shape[0], dim)) 
         for j, G in enumerate(grads):
             mask = (minidx == j)
             if np.any(mask): grad_chi[mask] = G[mask]
         
-        return chi, grad_chi # [num, 1] ? [num, dim=2]
+        return chi, grad_chi 
+    
     # [TODO: try implement substeping instead]
     def reflect(self, x: ndarray): # [num_point, dim=2]
         # compute Skorakhod reflects (eq 17): for chi(x) < 0 : y_hat = y-2*chi(x)*grad_chi
@@ -49,13 +70,14 @@ class DOM: # (maybe [TODO]: other outer boundary such as hexagon/curve)
             mask = (chi<0.) # (out)
             if not np.any(mask) : break # no penetration
             x_hat[mask] -= 2.*chi[mask, None]*grad_chi[mask]
-            
+
         return x_hat, float(np.maximum(0., -chi).max())
     
 @dataclass #(frozen=True)
 class Mesh:
     nodes : np.ndarray # [N,dim]
     elements : np.ndarray # [M, tri=2/3/4]
+    dom : DOM
     
     def __post_init__(self):
 
@@ -63,13 +85,10 @@ class Mesh:
         self.elements = np.asarray(self.elements, int)
         
         # (TODO) : how about assert and assume already preprocessed
-        valid_idx, invm = np.unique(self.elements, True)
-        if len(valid_idx) < len(self.nodes): 
-            print(f"Found disconnected nodes")
-            self.nodes = self.nodes[valid_idx]
-            self.elements = invm.reshape(self.elements.shape)
-
-        self.N, self.M = len(self.nodes), len(self.elements)
+        valid_idx, invm = np.unique(self.elements, return_inverse=True)
+        assert not len(valid_idx) < len(self.nodes)
+        
+        self.N, self.M = len(self.nodes), len(self.elements) 
         self.edges = np.sort(np.concatenate(  # sorting is requred to correctly extract the boundary edges.
             [self.elements[:, [0,1]], self.elements[:, [1,2]], self.elements[:, [2,0]]]
         , 0), 1)
@@ -78,7 +97,7 @@ class Mesh:
         self.bc_idx = np.unique(self.bc_edges)
         self.bc = self.nodes[self.bc_idx]
         
-        x = self.nodes[self.elements] # [M, tri=2/3/4, dim] 
+        x = self.nodes[self.elements] # [M, tri=3, dim]
         # [N, dim, dim] : each [[dx/dxi dx/deta], [dy/dxi, dy/deta]]
         J = np.stack((x[:, 1]-x[:,0], x[:, 2]-x[:,0]), -1) 
         detJ = np.linalg.det(J)
@@ -88,26 +107,35 @@ class Mesh:
         # - [j00 + j10, j01 + j11], [j00, j01], and [j10, j11]  
         Nxa, Nxb = self.invJ[:, 0, :], self.invJ[:, 1, :]
         Nxc = -(Nxa + Nxb)
-        self.basis_grad = np.stack([Nxa, Nxb, Nxc], 1) # [N, 3]
+        self.basis_grad = np.stack([Nxc, Nxa, Nxb], 1) # [M, 3, 2]
         
         # i.e. mass = zero(N) and for each loc in range(3): add.at(mass, elements[:,loc], area/3)
-        self.mass = np.bincount(self.elements.ravel(), weights=np.repeat(self.area / 3.0, 3), minlength=self.N)
+        self.mass = np.bincount(self.elements.ravel(), 
+                                weights=np.repeat(self.area / 3.0, 3), 
+                                minlength=self.N)
         assert np.all(self.mass > 0)
         self.M_lump, self.M_lump_inv = np.diag(self.mass), np.diag(1. / self.mass)
         
-        self.tri = matplotlib.tri.Triangulation(*self.nodes[:, 0].T, self.elements)
+        self.tri = matplotlib.tri.Triangulation(*self.nodes.T, self.elements)
         self.find = self.tri.get_trifinder()
         self.tree = scipy.spatial.cKDTree(self.nodes) # NB search
         
         # precompute D_l = M_lump^-1 * G_l for l={x,y}
         # self.Dx, self.Dy = self.ass_react() 
-        rows = np.repeat(self.elements, 3, axis=0).ravel() # [M*3*3]
+        rows = np.repeat(self.elements, 3, axis=1).ravel() # [M*3*3]
         cols = np.tile(self.elements, (1,3)).ravel() # [M*3*3]
         w_grad = (self.area[:, None, None] / 3.0) * self.basis_grad
         vx = np.tile(w_grad[:,:,0], (1,3)).ravel() / self.mass[rows] # [M*3*3]
         vy = np.tile(w_grad[:,:,1], (1,3)).ravel() / self.mass[rows] # [M*3*3]
-        self.Dx = csr_matrix((vx, (rows, cols)), shape=(self.N, self.N))
-        self.Dy = csr_matrix((vy, (rows, cols)), shape=(self.N, self.N))
+        self.Dx = csr_matrix((vx, (rows, cols)), shape=(self.N, self.N)).tocoo()
+        self.Dy = csr_matrix((vy, (rows, cols)), shape=(self.N, self.N)).tocoo()
+        
+        elem_h = np.sqrt(2. * self.area)
+        self.node_h = np.zeros(self.N) # local mesh size
+        for loc in range(3): # tri 3
+            val = elem_h/3.
+            np.add.at(self.node_h, self.elements[:, loc], val)
+        self.h_max = float(self.node_h.max())
         
     # def ass_react(self) -> tuple[csr_matrix, csr_matrix]:
     #     # precompute derivaitve metric for non-local reaction, return D_l = M_lump^-1 * G_l for l={x,y}
@@ -127,6 +155,9 @@ class Mesh:
     #     Dx, Dy = (self.M_lump_inv @ Gx).tocoo(), (self.M_lump_inv @ Gy).tocoo()
         
     #     return Gx, Gy # [shape (N, N) for each dim=1,2 etc]
+    
+    def reflect(self, x: ndarray): return self.dom.reflect(x)
+    
     def interp(self, x): 
         # get P1 bais weights (barycentric coord), x: [num, dim=2]
         e = self.find(x[:, 0], x[:, 1]) # [num,]
@@ -142,16 +173,15 @@ class Mesh:
             lamb1_2 = np.einsum("abc, ac->ab", self.invJ[e_in], diff)
             lamb0 = 1.0 - lamb1_2.sum(1)
             
-            lambdas = np.column_stack([lamb0, lamb1_2[:,0], lamb1_2[:,1]])
-            # should we clip and normalize?
+            lll = np.column_stack([lamb0, lamb1_2[:,0], lamb1_2[:,1]])
+            # should we clip and normalize? i.e. lll.clip(0, 1), 
             enodes[isin] = self.elements[e_in]
-            lambdas[isin] = lambdas[isin]
+            lambdas[isin] = lll
         
         if np.any(isout):
             _, nearest_idx = self.tree.query(x[isout]) # [num_out,]
-            for i in range(3):
-                enodes[isout, i] = nearest_idx[:, None]
-            lambdas[isout] =1. 
+            enodes[isout] = nearest_idx[:, None]
+            lambdas[isout, 0] =1. 
         
         return enodes, lambdas 
             
@@ -159,19 +189,19 @@ class Mesh:
         # compute nabla log phi via (D_l phi / phi)_i in R^node along l in {x,y}
         ratx, raty = np.zeros((self.N)), np.zeros((self.N)) #for dim l in {x,y} in R^2
         # (D_l)_ij * exp(f_j - f_i) = (D_l)_ij * phi_j / phi_i
-        ratx = self.Dx.data * np.exp(f[self.Dx.col] - f[self.Dx.row])
-        raty = self.Dy.data * np.exp(f[self.Dy.col] - f[self.Dy.row])
+        xs = self.Dx.data * np.exp(f[self.Dx.col] - f[self.Dx.row])
+        ys = self.Dy.data * np.exp(f[self.Dy.col] - f[self.Dy.row])
         # sum_j (D_l)_ij * exp(f_j - f_i) for each i, and dim l in {x,y}
-        np.add.at(ratx, self.Dx.row, ratx) 
-        np.add.at(raty, self.Dy.row, raty)
-        return ratx, raty
+        np.add.at(ratx, self.Dx.row, xs) 
+        np.add.at(raty, self.Dy.row, ys)
+        return np.column_stack([ratx, raty]) # [N, 2]
 
 @dataclass 
 class SLStenc0: # 3-branches SL-stencil for approximate ops U
     
-    x0 : np.ndarray # traceback characteristic point
-    x1 : np.ndarray # landing point node
-    w : np.ndarray # weights (log)
+    x0 : np.ndarray 
+    x1 : np.ndarray 
+    w : np.ndarray # weights (log): quadrature * barycentric weight
     mass : np.ndarray 
     pent : int = 0
     
@@ -183,43 +213,50 @@ class SLStenc0: # 3-branches SL-stencil for approximate ops U
         self.n = len(self.mass)
         row = np.bincount(self.x0, self.w, self.n)
         self.row_err = float(np.max(np.abs(row-1.))) #
-    
+
+        self.nnz_ratio = float(len(self.w)/float(self.n**2))
     @classmethod
     def build(cls, mesh: Mesh, b, dt, kappa): # construct SL-transition matrix
     
         w_ms = [2/3, 1/12, 1/12, 1/12, 1/12] # see weight def eq. 17 for 2dim
         alpha = np.sqrt(6*2*kappa*dt) # i.e. 6*d
-        jumps = np.array([[0,0,[alpha,0],[-alpha,0],[0,alpha],[[0,-alpha]]]])
+        jumps = np.array([[0,0],[alpha,0],[-alpha,0],[0,alpha],[0,-alpha]])
         
         nidx = np.repeat(np.arange(mesh.N), 3) # 
-        ys, y_tilds, ws, count = [], [], [], [], 0
+        ys, y_tilds, ws, count = [], [], [], 0
         base = mesh.nodes +dt*b
         for z, p in zip(jumps, w_ms):
             feet, pent = mesh.reflect(base+z)
             count = max(count, pent)
             vert, beta = mesh.interp(feet)
             ys += [nidx]
-            y_tilds += [vert.ravel]
+            y_tilds += [vert.ravel()]
             ws += [(p*beta).ravel()]
         return cls(*(np.concatenate(X) for X in [ys, y_tilds, ws]), mesh.mass, count)
+    
+    
+    
+    
     
     # [TODO] put check assertion with direct matrix-vector product
     def feyn_bwd(self, logv): # sum_{e: i_e=i} w_e * varphi_{j_e} 
         out = np.full(self.n, -np.inf)
-        for e, source in enumerate(self.x0): # try more efficient: np.logadexp.at(out, self.x0, self.lgw + logv[self.x1])
-            out[source] = np.log(np.exp(out[source] + np.exp(
-                    self.lgw[e] + logv[self.x1[e]])
-        ))
+        # for e, source in enumerate(self.x0): # try more efficient: 
+        #     out[source] = np.log(np.exp(out[source] + np.exp(
+        #             self.lgw[e] + logv[self.x1[e]])
+        # ))
+        np.logaddexp.at(out, self.x0, self.lgw + logv[self.x1])
         return out
     
-    def feyn_fwd(self, logv):
-        
-        out = np.full(self.n, -100.)
-        np.logaddexp.at(out, self.x1, self.lgw+self.lgm[self.x0]+logv[self.x0])
-        return - self.lgm + out
+    def feyn_fwd(self, logv): # i.e. M^-1 @ Pi^T @ M^-1
+        # [TODO: try using -infty instead of -100]
+        out = np.full(self.n, -100.) ### just replace source with targ and so on for foward sweep
+        np.logaddexp.at(out, self.x1, self.lgw +logv[self.x0] +self.lgm[self.x0]) 
+        return  out - self.lgm
     
 @dataclass 
 class Ekern: # interaction kernel E (implement entire drift b(t,x,rho_t))
+    nodes : ndarray
     gamma : float = .02
     sigma : float = .3
     # block : int = 256
@@ -241,68 +278,103 @@ class Ekern: # interaction kernel E (implement entire drift b(t,x,rho_t))
         ])
         r = -np.einsum('ijd, tj,tjd->ti', self.dE, rho_mass, rel_grad)
         # try clipping, but stay like this [TODO]
+        r = np.clip(r, -20, 20)
         return logW, b, r
 
 
-
-def solve_mfrsb(mesh: Mesh, E: Ekern, SL : SLStenc0, c: Config): 
+def solve_mfrsb(mesh: Mesh, E: Ekern, SL : SLStenc0, c: Config, 
+                marginals_func: Callable, logger: Experiment): 
+    '''Main Solver'''
+    np.random.seed(c.seed)
+    assert c.splitting in ["strang", "lie"] 
     
-    # initialization 
     dt = c.T/c.Nt 
-    lgmu0, lgmuT = np.log(None), np.log(None) 
+    mu0, muT = marginals_func(mesh.nodes, mesh.mass) 
+    lgmu0, lgmuT = np.log(mu0), np.log(muT) 
     rho = np.full((c.Nt+1, mesh.N), 1/mesh.mass.sum()) # uniform
-    f, h = np.zeros_like(rho, c.dtype), np.zeros_like(rho, c.dtype) # f=log(phi), g=log(phi_hat)
+    f, h = np.zeros_like(rho), np.zeros_like(rho) # f=log(phi), g=log(phi_hat)
     
-    # meta = { # A
-    #     "rho_diff" : [], "mu0_err" : [], "muT_err" : [], "max_pnt" : [], "EOC" :[],
-    #     "err_adj" : [], "CPU_time_n" : [], "contract_fact" : [], "AT" : [], "A0T" : []
-    # }
+
+    
+    start_time = time.perf_counter()
+    prev_diff = None 
+    
     for n in range(1, c.N_iter+1):
         
-        ## (1) precompute fixed quantities 
-        ops: list[SLStenc0] = []
-        logW, r, b = np.empty_like(rho), np.empty_like(rho), np.empty((*rho.shape, c.dim))
-        for k in range(c.Nt+1):
-            logW, r, b = E.field(mesh, rho[k], f[k], c.kappa)
-            ops += [SL.build(mesh, b[k], dt, c.kappa)]
-        ops = ops[:-1] # remove extra ops
+        inner_time_start = time.perf_counter()
         
-        fn, hn = np.empty_like(f), np.empty_like(h)
+        logW, b, r, = E.field(mesh, rho, f, c.kappa)
+        ops: list[SLStenc0] = [SL.build(mesh, b[k], dt, c.kappa)
+                                    for k in range(c.Nt)]
         
+        fn, hn = np.empty_like(f), np.empty_like(h) # varphi and varphi_hat (log)
         fn[-1] = f[-1]
-        for k in range(len(SL)-1, -1,-1):
-            f[k] = .5*dt*r[k] + \
-                    ops[k].feyn_bwd(f[k+1] + \
-                    .5*dt*r[k+1])
-        h[0] = lgmu0 - logW[0] - fn[0]
+
+        for k in range(c.Nt-1, -1,-1):
+            if c.splitting == 'strang':
+                fn[k] = .5*dt*r[k] + \
+                        ops[k].feyn_bwd(fn[k+1] + \
+                        .5*dt*r[k+1])
+            elif c.splitting == 'lie':
+                fn[k] = ops[k].feyn_bwd(fn[k+1] + dt*r[k+1]) 
+                
+        hn[0] = lgmu0 - logW[0] - fn[0]
         
         for k, op in enumerate(ops):
-            h[k+1] = .5*dt*r[k+1] + \
-                    op.feyn_fwd(h[k] + \
-                    .5*dt*r[k])
-        f[-1] = lgmuT - logW[-1] - hn[-1]
+            if c.splitting == 'strang':
+                hn[k+1] = .5*dt*r[k+1] + \
+                        op.feyn_fwd(hn[k] + \
+                        .5*dt*r[k])
+            elif c.splitting == 'lie':
+                hn[k+1]= dt * r[k+1] + op.feyn_fwd(hn[k])
+                
+        fn[-1] = lgmuT - logW[-1] - hn[-1]
         
-        # main Fixed-point updates
         logrho = logW + fn + hn
-        logz =  logsumexp(logrho + np.log(mesh.mass)[None, :], axis=1, keepdim=True)
+        logz =  logsumexp(logrho + np.log(mesh.mass)[None, :], axis=1, keepdims=True)
         rho_half = np.exp(logrho - logz)
         rho_next = (1. - c.theta) * rho + c.theta * rho_half
         
-        # # diagnostic
-        # rho_diff = float(np.max(abs(rho_next - rho_half)))
+        #### DONE ###
+        cpu_iter = time.perf_counter() - inner_time_start
+        
+        rho_diff = logger.log_step(n, rho_next, rho, prev_diff, mu0, muT, mesh, ops, 
+                                b, logz, dt, c.kappa, cpu_iter, compute_w2_marginal)
+        prev_diff = rho_diff 
+        rho, f, h = rho_next, fn, hn
+        
+        if rho_diff <= c.tol: break ### converged! 
 
-
+    # finalize
+    for k in range(c.Nt-1, -1, -1):
+        f[k] = .5 * dt * r[k] + ops[k].feyn_bwd(
+            f[k+1] +.5 * dt * r[k+1]
+        )
+    
+    # alpha^* = 2*kappa*nabla(varphi) where varphi = nabla(phi) / phi
+    optimal_alpha = np.sqrt(2. * c.kappa) * np.array(
+       [ mesh.compute_relative_grad(f[k]) for k in range(c.Nt+1)]
+    )
+    optimal_alpha[-1] = optimal_alpha[-2].copy()
+    
+    final_energy = free_energy(mesh, E, rho, c.kappa)
+    
+    endtime = time.perf_counter() - start_time
+    
+    return {'rho': rho, 'f': f, 'h': h, 'b': b, 'mu0' : mu0, 'muT': muT,
+            'opt_alpha': optimal_alpha, 'dt': dt, 'T': c.T, 
+            'kappa': c.kappa, 'free_energy' : final_energy}
 
 ############################ additional subclass DOM ############################
 
 @dataclass 
 class DOMobs1(DOM):
-    circles = [((0, 0), 0.3)] # ((x, y), radius)
-    rrects = [] # corner-smoothed rectangle, [(x0, x1, y0, y1, rf), ...]
-    
+    circles: List = field(default_factory=list)  # ((x, y), radius)
+    rrects: List = field(default_factory=list)  # corner-smoothed rectangle, [(x0, x1, y0, y1, rf), ...]
+
     def __post_init__(self):
         self.rrect_data = []
-        for x0, x1, y0, y1, rf in self.rounded_rects:
+        for x0, x1, y0, y1, rf in self.rrects:
             c = np.array([0.5 * (x0 + x1), 0.5 * (y0 + y1)], dtype=float)
             h = np.maximum(0.0, 0.5 * np.array([x1 - x0, y1 - y0]) - rf)
             self.rrect_data.append((c, h, float(rf)))
@@ -311,7 +383,7 @@ class DOMobs1(DOM):
         
         for (xc, yc), r in self.circles: 
             diff = x - np.array([xc,yc])
-            norm = linalg.norm(diff, 1) 
+            norm = linalg.norm(diff, axis=1) 
             dists += [norm-r]
             grads += [diff / np.maximum(norm, 1e-14)[:, None]]
         
@@ -320,7 +392,7 @@ class DOMobs1(DOM):
             diff = x - c
             q = np.abs(diff) - h
             q_max = np.maximum(q, 0.0)
-            out_dist = np.linalg.norm(q_max, axis=1)
+            out_dist = linalg.norm(q_max, axis=1)
             in_dist = np.minimum(np.maximum(q[:, 0], q[:, 1]), 0.0)
             
             dists += [out_dist + in_dist - rf]
@@ -339,24 +411,3 @@ class DOMobs1(DOM):
             
         return dists, grads
     
-# [how about put this in utils.py?]
-make_dom_1 = lambda h_min=0.02, h_max=0.04: build_dom_example(
-        bounds=(0.0, 2.0, 0.0, 1.0),
-        circles=[((0.95, 0.50), 0.32)],
-        rounded_rects=[], h_min=h_min, h_max=h_max
-)
-make_dom_2 = lambda h_min=0.02, h_max=0.04: build_dom_example(
-    bounds=(0.0, 2.8, 0.0, 1.0), 
-        circles=[
-            ((0.58, 0.26), 0.09),
-            ((0.58, 0.74), 0.09),
-        ],
-        rounded_rects=[
-            (0.92, 1.10, -0.15, 0.68, 0.09),
-            (1.42, 1.60,  0.32, 1.15, 0.09),
-            (1.92, 2.12,  0.24, 0.76, 0.09),
-        ], h_min=h_min, h_max=h_max
-)
-# 1d with boundary [-1, 1] (simple)
-make_dom_3 = None
-
