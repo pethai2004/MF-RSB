@@ -1,0 +1,282 @@
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{mymath}[2026 Mathematical Template]
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 1. PACKAGES
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\RequirePackage{
+    amsmath,amssymb,amsfonts,amsthm,
+    mathtools,mathrsfs,bm,bbm,float,booktabs,multirow,
+    tabularx,siunitx,enumitem,titlesec,subcaption,
+    xcolor
+}
+\RequirePackage{graphicx}
+\RequirePackage{caption}
+
+\captionsetup[figure]{
+    font=small,
+    labelfont=bf,
+    margin=2cm,
+    justification=justified,
+    singlelinecheck=false
+}
+
+\RequirePackage[ruled,vlined]{algorithm2e}
+\RequirePackage{natbib}
+\RequirePackage{hyperref}
+\RequirePackage{cleveref}
+
+
+\captionsetup[table]{
+  position=bottom,   % Ensures correct spacing when caption is at the bottom
+  font=small,         % Makes the caption font smaller (e.g., small, footnotesize)
+  margin=2cm,
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 2. SECTION FORMATTING
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\titleformat{\section}
+    {\normalfont\normalsize\bfseries}{\thesection.}{0.5em}{}
+
+\titleformat{\subsection}
+    {\normalfont\small\bfseries}{\thesubsection.}{0.5em}{}
+
+\titleformat{\subsubsection}
+    {\normalfont\small\itshape}{\thesubsubsection.}{0.5em}{}
+
+\titlespacing*{\section}{0pt}{6pt}{3pt}
+\titlespacing*{\subsection}{0pt}{4pt}{2pt}
+\titlespacing*{\subsubsection}{0pt}{3pt}{1pt}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 3. THEOREM ENVIRONMENTS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{col}[theorem]{Corollary}
+\newtheorem{claim}[theorem]{Claim}
+
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{assumption}[theorem]{Assumption}
+\newtheorem{example}[theorem]{Example}
+
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{observation}[theorem]{Observation}
+
+\newtheorem*{theorem*}{Theorem}
+\newtheorem*{proposition*}{Proposition}
+\newtheorem*{remark*}{Remark}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 4. MATHEMATICAL SHORTCUTS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 4. MATHEMATICAL SHORTCUTS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Calligraphic letters
+\newcommand{\cA}{\mathcal{A}}
+\newcommand{\cB}{\mathcal{B}}
+\newcommand{\cC}{\mathcal{C}}
+\newcommand{\cD}{\mathcal{D}}
+\newcommand{\cE}{\mathcal{E}}
+\newcommand{\cF}{\mathcal{F}}
+\newcommand{\cG}{\mathcal{G}}
+\newcommand{\cH}{\mathcal{H}}
+\newcommand{\cI}{\mathcal{I}}
+\newcommand{\cJ}{\mathcal{J}}
+\newcommand{\cK}{\mathcal{K}}
+\newcommand{\cL}{\mathcal{L}}
+\newcommand{\cM}{\mathcal{M}}
+\newcommand{\cN}{\mathcal{N}}
+\newcommand{\cO}{\mathcal{O}}
+\newcommand{\cP}{\mathcal{P}}
+\newcommand{\cQ}{\mathcal{Q}}
+\newcommand{\cR}{\mathcal{R}}
+\newcommand{\cS}{\mathcal{S}}
+\newcommand{\cT}{\mathcal{T}}
+\newcommand{\cU}{\mathcal{U}}
+\newcommand{\cV}{\mathcal{V}}
+\newcommand{\cW}{\mathcal{W}}
+\newcommand{\cX}{\mathcal{X}}
+\newcommand{\cY}{\mathcal{Y}}
+\newcommand{\cZ}{\mathcal{Z}}
+
+% Blackboard bold letters
+\newcommand{\bA}{\mathbb{A}}
+\newcommand{\bB}{\mathbb{B}}
+\newcommand{\bC}{\mathbb{C}}
+\newcommand{\bD}{\mathbb{D}}
+\newcommand{\bE}{\mathbb{E}}
+\newcommand{\bF}{\mathbb{F}}
+\newcommand{\bG}{\mathbb{G}}
+\newcommand{\bH}{\mathbb{H}}
+\newcommand{\bI}{\mathbb{I}}
+\newcommand{\bJ}{\mathbb{J}}
+\newcommand{\bK}{\mathbb{K}}
+\newcommand{\bL}{\mathbb{L}}
+\newcommand{\bM}{\mathbb{M}}
+\newcommand{\bN}{\mathbb{N}}
+\newcommand{\bO}{\mathbb{O}}
+\newcommand{\bP}{\mathbb{P}}
+\newcommand{\bQ}{\mathbb{Q}}
+\newcommand{\bR}{\mathbb{R}}
+\newcommand{\bS}{\mathbb{S}}
+\newcommand{\bT}{\mathbb{T}}
+\newcommand{\bU}{\mathbb{U}}
+\newcommand{\bV}{\mathbb{V}}
+\newcommand{\bW}{\mathbb{W}}
+\newcommand{\bX}{\mathbb{X}}
+\newcommand{\bY}{\mathbb{Y}}
+\newcommand{\bZ}{\mathbb{Z}}
+
+% Bold letters
+\newcommand{\fA}{\mathbf{A}}
+\newcommand{\fB}{\mathbf{B}}
+\newcommand{\fC}{\mathbf{C}}
+\newcommand{\fD}{\mathbf{D}}
+\newcommand{\fE}{\mathbf{E}}
+\newcommand{\fF}{\mathbf{F}}
+\newcommand{\fG}{\mathbf{G}}
+\newcommand{\fH}{\mathbf{H}}
+\newcommand{\fI}{\mathbf{I}}
+\newcommand{\fJ}{\mathbf{J}}
+\newcommand{\fK}{\mathbf{K}}
+\newcommand{\fL}{\mathbf{L}}
+\newcommand{\fM}{\mathbf{M}}
+\newcommand{\fN}{\mathbf{N}}
+\newcommand{\fO}{\mathbf{O}}
+\newcommand{\fP}{\mathbf{P}}
+\newcommand{\fQ}{\mathbf{Q}}
+\newcommand{\fR}{\mathbf{R}}
+\newcommand{\fS}{\mathbf{S}}
+\newcommand{\fT}{\mathbf{T}}
+\newcommand{\fU}{\mathbf{U}}
+\newcommand{\fV}{\mathbf{V}}
+\newcommand{\fW}{\mathbf{W}}
+\newcommand{\fX}{\mathbf{X}}
+\newcommand{\fY}{\mathbf{Y}}
+\newcommand{\fZ}{\mathbf{Z}}
+
+% Lowercase bold letters
+\newcommand{\fa}{\mathbf{a}}
+\newcommand{\fb}{\mathbf{b}}
+\newcommand{\fc}{\mathbf{c}}
+\newcommand{\fd}{\mathbf{d}}
+\newcommand{\fe}{\mathbf{e}}
+\newcommand{\ff}{\mathbf{f}}
+\newcommand{\fg}{\mathbf{g}}
+\newcommand{\fh}{\mathbf{h}}
+% \newcommand{\fi}{\mathbf{i}}
+\newcommand{\fj}{\mathbf{j}}
+\newcommand{\fk}{\mathbf{k}}
+\newcommand{\fl}{\mathbf{l}}
+\newcommand{\fm}{\mathbf{m}}
+\newcommand{\fn}{\mathbf{n}}
+\newcommand{\fo}{\mathbf{o}}
+\newcommand{\fp}{\mathbf{p}}
+\newcommand{\fq}{\mathbf{q}}
+\newcommand{\fr}{\mathbf{r}}
+\newcommand{\fs}{\mathbf{s}}
+\newcommand{\ft}{\mathbf{t}}
+\newcommand{\fu}{\mathbf{u}}
+\newcommand{\fv}{\mathbf{v}}
+\newcommand{\fw}{\mathbf{w}}
+\newcommand{\fx}{\mathbf{x}}
+\newcommand{\fy}{\mathbf{y}}
+\newcommand{\fz}{\mathbf{z}}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 5. COMMON SYMBOLS AND OPERATORS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\eps}{\varepsilon}
+\newcommand{\del}{\partial}
+\newcommand{\grad}{\nabla}
+\newcommand{\lap}{\Delta}
+\newcommand{\1}{\mathbbm{1}}
+\newcommand{\Id}{\mathrm{Id}}
+
+\newcommand{\dx}{\,\mathrm{d}x}
+\newcommand{\dy}{\,\mathrm{d}y}
+\newcommand{\dt}{\,\mathrm{d}t}
+\newcommand{\ds}{\,\mathrm{d}s}
+
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Prob}{\mathbb{P}}
+\newcommand{\Var}{\operatorname{Var}}
+\newcommand{\Cov}{\operatorname{Cov}}
+\newcommand{\Law}{\operatorname{Law}}
+
+\DeclarePairedDelimiter{\norm}{\lVert}{\rVert}
+\DeclarePairedDelimiter{\abs}{\lvert}{\rvert}
+\DeclarePairedDelimiter{\inner}{\langle}{\rangle}
+
+\DeclareMathOperator{\supp}{supp}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator{\rank}{rank}
+\DeclareMathOperator{\tr}{tr}
+\DeclareMathOperator{\argmin}{arg\,min}
+\DeclareMathOperator{\argmax}{arg\,max}
+\DeclareMathOperator{\esssup}{ess\,sup}
+\DeclareMathOperator{\Lip}{Lip}
+\DeclareMathOperator{\dist}{dist}
+
+\newcommand{\weakto}{\rightharpoonup}
+\newcommand{\wstar}{\overset{*}{\rightharpoonup}}
+\newcommand{\pto}{\xrightarrow{\mathbb{P}}}
+\newcommand{\dto}{\xrightarrow{\mathrm{d}}}
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\Q}{\mathbb{Q}}
+\newcommand{\C}{\mathbb{C}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 6. FORMATTING
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1pt}
+
+\setlength{\topsep}{2pt}
+\setlength{\partopsep}{0pt}
+\setlength{\abovedisplayskip}{2pt}
+\setlength{\belowdisplayskip}{2pt}
+\setlength{\abovedisplayshortskip}{2pt}
+\setlength{\belowdisplayshortskip}{2pt}
+
+\setlist{nosep}
+
+\setlength{\algomargin}{1em}
+
+\definecolor{linkblue}{RGB}{0,0,180}
+\definecolor{citered}{RGB}{180,0,0}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=linkblue,  % Equations, sections, theorem references
+    citecolor=citered,   % Bibliography citations
+    urlcolor=linkblue
+}
+
+\widowpenalty=10000
+\clubpenalty=10000
+\emergencystretch=1em
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% END
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

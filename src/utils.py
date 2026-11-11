@@ -6,6 +6,50 @@ import gmsh
 
 import matplotlib.pyplot as plt
 
+@dataclass 
+class Experiment:
+    path: str = '../assets/result_trial'
+    history : dict = field(default_factory=lambda : {
+            'n':[], 'drho_inf':[], 'q_n':[], 'mu0_err':[], 'muT_err':[], 'w2_T':[],
+            'max_pent': [], 'err_mass': [], 'pe_h': [], 'cfl': [], 'cpu_time':[]})
+
+    def __post_init__(self):
+        os.makedirs(self.path, exist_ok=True)
+    
+    def log_step(self, n, rho_next, rho_prev, prev_diff, mu0, muT, mesh, ops,
+                b_field, logz, dt, kappa, cpu_time):
+        
+        rho_diff = float(np.max(np.abs(rho_next[1:-1] - rho_prev[1:-1])))
+        q_val = float(rho_diff / prev_diff) if (prev_diff is not None and prev_diff > 1e-15) else np.nan
+        b_norm = np.linalg.norm(b_field, axis=-1)
+        pe_h = float(np.max(b_norm * mesh.node_h[None, :]) / (2.0 * kappa))
+        cfl = float(np.max(b_norm / mesh.node_h[None, :]) * dt)
+        
+        self.history["n"].append(n)
+        self.history["drho_inf"].append(rho_diff)
+        self.history["q_n"].append(q_val)
+        self.history["mu0_err"].append(float(mesh.mass @ np.abs(rho_next[0] - mu0)))
+        self.history["muT_err"].append(float(mesh.mass @ np.abs(rho_next[-1] - muT)))
+        self.history["w2_T"].append(compute_w2_marginal(mesh.nodes, mesh.mass, rho_next[-1], muT))
+        self.history["logz_max"].append(float(np.max(np.abs(logz))))
+        self.history["max_pent"].append(float(max(op.pent for op in ops)))
+        self.history["err_mass"].append(float(np.max(np.abs((rho_next @ mesh.mass) - 1.0))))
+        self.history["pe_h"].append(pe_h)
+        self.history["cfl"].append(cfl)
+        self.history["cpu_time"].append(cpu_time)
+    
+def save_density_snapshot(dir_path, rho, size=4): 
+    # save `size` number of snapshop to `dir_path/snap_shot_{prefix}/{idx_img}`
+    pass
+
+def save_traj_snapshot(dir_path, Xs, size=4): 
+    # save `size` number of snapshop to `dir_path/snap_shot_{prefix}/{idx_img}`
+    pass
+
+
+def save_sim_traj(size=4): 
+    pass
+    
 def compute_w2_marginal(nodes, mass, rho_a, rho_b):
     """Computes fast Gaussian/moment + 1D-sliced Wasserstein-2 distance proxy on unstructured mesh."""
     p = np.maximum(rho_a * mass, 0.0)
@@ -27,6 +71,15 @@ def compute_w2_marginal(nodes, mass, rho_a, rho_b):
         w2_sq += (2.0 / len(angles)) * np.mean((qp - qq) ** 2)
     return float(np.sqrt(w2_sq))
 
+
+
+
+
+
+
+
+
+
 def free_energy(mesh, E, rho: ndarray, kappa):
     rho_mass = rho * mesh.mass[None,:]
     ent = kappa * np.sum( rho_mass * np.log(np.maximum(rho, 1e-300)),axis=1)
@@ -35,6 +88,13 @@ def free_energy(mesh, E, rho: ndarray, kappa):
     return ent + interaction
 
 
+
+
+
+
+
+
+    
 def sample_p1_density(mesh, density: np.ndarray, Np: int, rng):
     """Sample particles over a triangulated domain."""
 
@@ -402,41 +462,3 @@ def build_dom_example(bounds, circles, rounded_rects, h_min=0.028, h_max=0.040):
         elements[cw_mask, 1], elements[cw_mask, 2] = elements[cw_mask, 2].copy(), elements[cw_mask, 1].copy()
 
     return nodes, elements
-
-
-# def make_dom_2(h_min=0.026, h_max=0.038):
-#     """Case 2: C^{1,1} Smooth-Corner Serpentine Maze."""
-#     return build_dom_example(
-#         bounds=(0.0, 2.8, 0.0, 1.0),
-#         circles=[((0.58, 0.26), 0.09), ((0.58, 0.74), 0.09)],
-#         rounded_rects=[
-#             (0.92, 1.10, -0.15, 0.68, 0.09),
-#             (1.42, 1.60,  0.32, 1.15, 0.09),
-#             (1.92, 2.12,  0.24, 0.76, 0.09),
-#         ],
-#         h_min=h_min, h_max=h_max
-#     )
-# # 1d with boundary [-1, 1] (simple)
-# make_dom_3 = None
-
-
-
-
-
-# def marginals_maze(nodes, mass):
-#     x, y = nodes[:, 0], nodes[:, 1]
-#     sig = 0.065
-#     g1 = np.exp(-((x - 0.26) ** 2 + (y - 0.22) ** 2) / (2.0 * sig ** 2))
-#     g2 = np.exp(-((x - 0.26) ** 2 + (y - 0.50) ** 2) / (2.0 * sig ** 2))
-#     g3 = np.exp(-((x - 0.26) ** 2 + (y - 0.78) ** 2) / (2.0 * sig ** 2))
-#     mu_init = (g1 + g2 + g3) / 3.0 + 1e-12
-#     mu_init /= np.sum(mass * mu_init)
-
-#     eps = 0.045
-#     dx = np.maximum(0.0, np.maximum(2.30 - x, x - 2.65))
-#     dy_bot = np.maximum(0.0, np.maximum(0.10 - y, y - 0.36))
-#     dy_top = np.maximum(0.0, np.maximum(0.64 - y, y - 0.90))
-#     mu_targ = 0.5 * (np.exp(-(dx ** 2 + dy_bot ** 2) / (2.0 * eps ** 2)) +
-#                      np.exp(-(dx ** 2 + dy_top ** 2) / (2.0 * eps ** 2))) + 1e-12
-#     mu_targ /= np.sum(mass * mu_targ)
-#     return mu_init, mu_targ

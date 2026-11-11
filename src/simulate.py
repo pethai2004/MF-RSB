@@ -4,76 +4,147 @@ import time, os, argparse
 from core import *
 from utils import *
 
-def run_circle_obs_fig(config: Config, save_result=False, num_particle=30, n_snapshot=6):
+ASDIR = '../assets/'
+# def run_circle_obs_fig(config: Config, save_result=False, num_particle=30, n_snapshot=6):
     
-    logger = Experiment(config.name_path)
+#     logger = Experiment(config.name_path)
 
-    bound=(0, 2, 0, 1)
-    circles= [((.9, .5), .4)]
-    rounded_rects=[]
-    nodes0, eles0 = build_dom_example(
-        bound, circles, rounded_rects,
-        h_min=config.h_min, h_max=config.h_max
-    )
+#     bound=(0, 2, 0, 1)
+#     circles= [((.9, .5), .4)]
+#     rounded_rects=[]
+#     nodes0, eles0 = build_dom_example(
+#         bound, circles, rounded_rects,
+#         h_min=config.h_min, h_max=config.h_max
+#     )
 
-    dom = DOMobs1(3, bound, circles, rounded_rects)
-    mesh = Mesh(nodes0, eles0, dom)
-    E0 = Ekern(nodes0, gamma=config.gamma, sigma=config.sigma)
+#     dom = DOMobs1(3, bound, circles, rounded_rects)
+#     mesh = Mesh(nodes0, eles0, dom)
+#     E0 = Ekern(nodes0, gamma=config.gamma, sigma=config.sigma)
 
-    def _make_marg(nodes, mass):
-        x, y = nodes.T
+#     def _make_marg(nodes, mass):
+#         x, y = nodes.T
         
-        g1 = np.exp(-((x - 0.35) ** 2 + (y - 0.30) ** 2) / (2.0 * 0.08 ** 2))
-        g2 = np.exp(-((x - 0.35) ** 2 + (y - 0.70) ** 2) / (2.0 * 0.08 ** 2))
-        mu0= 0.5 * (g1 + g2) + 1e-12
+#         g1 = np.exp(-((x - 0.35) ** 2 + (y - 0.30) ** 2) / (2.0 * 0.08 ** 2))
+#         g2 = np.exp(-((x - 0.35) ** 2 + (y - 0.70) ** 2) / (2.0 * 0.08 ** 2))
+#         mu0= 0.5 * (g1 + g2) + 1e-12
         
-        dx = np.maximum(0., np.maximum(1.5-x, x-1.8))
-        dy = np.maximum(0., np.maximum(.35-y, y-.85))
-        muT = np.exp(-(dx**2 + dy**2) / (2.*.05**2)) + 1e-12
+#         dx = np.maximum(0., np.maximum(1.5-x, x-1.8))
+#         dy = np.maximum(0., np.maximum(.35-y, y-.85))
+#         muT = np.exp(-(dx**2 + dy**2) / (2.*.05**2)) + 1e-12
         
-        return mu0 / np.sum(mass*mu0), muT / np.sum(mass*muT)
+#         return mu0 / np.sum(mass*mu0), muT / np.sum(mass*muT)
     
     
-    solution = solve_mfrsb(mesh, E0, SLStenc0, config, _make_marg, logger) 
+#     solution = solve_mfrsb(mesh, E0, SLStenc0, config, _make_marg, logger) 
     
-    if save_result:
-        box = [(1.45, 1.82, 0.20, 0.80)]
-        trajs, max_penetration = path_sim(mesh, solution, num_particle, 3, config.seed)
-        save_snapshot2d(mesh, solution, 
-                        os.path.join(config.name_path, "snapshot.png"),
-                        trajs, box, n_snapshot, "MFRSB with Circular Obs")
-        logger.save_sol("solution_circle", mesh, solution, trajs, box)
+#     if save_result:
+#         box = [(1.5, 1.8, 0.35, 0.85)]
+#         trajs, max_penetration = path_sim(mesh, solution, num_particle, 3, config.seed)
+#         save_snapshot2d(mesh, solution, 
+#                         os.path.join(config.name_path, "snapshot.png"),
+#                         trajs, box, n_snapshot, "MFRSB with Circular Obs")
+#         logger.save_sol("solution_circle", mesh, solution, trajs, box)
         
-    return solution, logger
+#     return solution, logger
 
-# # Illustrative example 2:
+### 1-dim illusttrative case, with disconnected domain and blockage between two marginals (no solution)
 
-# def run_multi_obs_fig():
-#     pass 
+# def run_mz_obs_fig(config: Config, save_result=True, num_particle=200, n_snapshot=20):
+    
+#     logger = Experiment(config.name_path)
+
+#     bound = (0.0, 3.0, 0.0, 1.2)
+    
+#     circles = [
+#         ((0.60, 0.32), 0.10),
+#         ((0.60, 0.88), 0.10)
+#     ]
+
+#     rounded_rects = [
+#         (0.98, 1.24, -0.20, 0.82, 0.08),
+#         (1.52, 1.78,  0.38, 1.40, 0.08),
+#         (2.06, 2.32,  0.35, 0.85, 0.08)
+#     ]
+#     nodes0, eles0 = build_dom_example(
+#         bound, circles, rounded_rects,
+#         h_min=config.h_min, h_max=config.h_max
+#     )
+
+#     dom = DOMobs1(3, bound, circles, rounded_rects)
+#     mesh = Mesh(nodes0, eles0, dom)
+#     E0 = Ekern(nodes0, gamma=config.gamma, sigma=config.sigma)
+
+#     def _make_marg(nodes, mass):
+#         x, y = nodes[:, 0], nodes[:, 1]
+            
+#         # Source marginal mu_0: Tri-modal Gaussian cluster near the entrance
+#         s0 = 0.075
+#         g1 = np.exp(-((x - 0.28)**2 + (y - 0.28)**2) / (2.0 * s0**2))
+#         g2 = np.exp(-((x - 0.28)**2 + (y - 0.60)**2) / (2.0 * s0**2))
+#         g3 = np.exp(-((x - 0.28)**2 + (y - 0.92)**2) / (2.0 * s0**2))
+#         mu0 = (g1 + g2 + g3) / 3.0 + 1e-12
+#         mu0 /= np.sum(mass * mu0)
+        
+#         # Target marginal mu_T: Bi-modal split target past the final baffle
+#         sT = 0.055
+#         dx = np.maximum(0.0, np.maximum(2.55 - x, x - 2.85))
+#         dy_bot = np.maximum(0.0, np.maximum(0.12 - y, y - 0.42))
+#         dy_top = np.maximum(0.0, np.maximum(0.78 - y, y - 1.08))
+        
+#         muT = 0.5 * (
+#             np.exp(-(dx**2 + dy_bot**2) / (2.0 * sT**2)) +
+#             np.exp(-(dx**2 + dy_top**2) / (2.0 * sT**2))
+#         ) + 1e-12
+#         muT /= np.sum(mass * muT)
+            
+#         return mu0, muT
+
+    
+#     solution = solve_mfrsb(mesh, E0, SLStenc0, config, _make_marg, logger) 
+    
+#     if save_result:
+#         box = None
+#         trajs, max_penetration = path_sim(mesh, solution, num_particle, 3, config.seed)
+#         save_snapshot2d(mesh, solution, 
+#                         os.path.join(config.name_path, "snapshot.png"),
+#                         trajs, box, n_snapshot, "MFRSB with Mz Obs")
+#         logger.save_sol("solution_mz", mesh, solution, trajs, box)
+        
+#     return solution, logger
 
 
-# (Study Main 1) Convergence for temporal/spatial mesh -> 0
+########## fig 1 (3by2): snapshot and table 1 (3by2)
+def run_trial_0():
+    
+    def _make_marginal(nodes, mass):
+        pass
+    
+    
+    
+########## graph 1 (2-subplots). fixed-point, x-axis (n) against |Delta rho^n| y-axis for difference 
+# (a) ops split/linear solve (b) stencils
+
+def run_trial_1():
+    
+    pass 
+    
+
+
+
+########## table 2: for inc t / inc x / (inc t, inc x) ->0 
 
 
 
 
 
 
-# (Study Main 2)
+
+
+########## 1dim case (2by2)
 
 
 
+########## fig 3 (2d-plot, 3by2) illustrate 1 dimensional transport plan for 
+# kappa= 0, 0.5, 1., gamma=0, 0,5, 1. (density+particle)
+# graph: x-axis n teration  (for each params) against (a) FB res (b) log Z, (c) pair L^1, (d) term res etc
 
-
-
-# (Study Main 3)
-
-
-
-
-
-
-
-
-
-# (Study Main 4)

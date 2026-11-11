@@ -10,5 +10,7 @@
         "**/main.log": true,
         "**/main.gz": true,
         "**/main.out": true
-    }
+    },
+    "python-envs.defaultEnvManager": "ms-python.python:conda",
+    "python-envs.defaultPackageManager": "ms-python.python:conda"
 }

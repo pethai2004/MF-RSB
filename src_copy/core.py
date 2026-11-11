@@ -1,40 +1,28 @@
 from dataclasses import dataclass, field
 from typing import List, Tuple, Callable
 import time 
+from concurrent.futures import ThreadPoolExecutor
+## [TODO : try adding parallization]
 
 import numpy as np 
-from numpy import linalg, ndarray, exp, log
-import matplotlib
+from numpy import linalg, ndarray
 import scipy
-from scipy.sparse import csr_matrix
+from scipy.sparse import csr_matrix, diags
 from scipy.special import logsumexp
-
+import matplotlib
 
 from src.utils import *
 
+## Include: core FEM, reflection, interpolation, Mesh, DOM.
+
 dim = 2 # [TODO : implement dim = 1 and 3 ?]
+tri = 3 #  [TODO : remove this global??]
+
 
 @dataclass
-class Config:
-    
-    name_path: str = '../assets/Trial'
-    T: float = 1.
-    Nt: int = 40 # num temporal grid
-    h_min : float = .28
-    h_max : float = .4
-    kappa: float = .05 # sigma = sqrt(2 * kappa)
-    gamma: float = .02 # interaction stength
-    sigma: float = .35 # not diffusion coef, is for Gaussian interaction
-    N_iter: int = 30 
-    tol: float = 1e-5
-    theta: float = .65 # damping 
-    splitting: str = "strang" # or lie, yoshida ? 
-    seed: int = 555
-    
-@dataclass
 class DOM: # (maybe [TODO]: other outer boundary such as hexagon/curve)
-    n_resolves : int =3
-    bounds : Tuple[float] = (-2, 2, -1, 1) # [x0, x1, y0, y1]
+    n_resolves : int = 3
+    bounds = (-2, 2, -1, 1) # [x0, x1, y0, y1]
     
     def _sdf_gradchi(self, x, dists, glists) : return dists, glists
     
@@ -61,7 +49,6 @@ class DOM: # (maybe [TODO]: other outer boundary such as hexagon/curve)
         
         return chi, grad_chi 
     
-    # [TODO: try implement substeping instead]
     def reflect(self, x: ndarray): # [num_point, dim=2]
         # compute Skorakhod reflects (eq 17): for chi(x) < 0 : y_hat = y-2*chi(x)*grad_chi
         x_hat = x.copy()
@@ -72,8 +59,14 @@ class DOM: # (maybe [TODO]: other outer boundary such as hexagon/curve)
             x_hat[mask] -= 2.*chi[mask, None]*grad_chi[mask]
 
         return x_hat, float(np.maximum(0., -chi).max())
+
+def _reflect(cls, x0, x1, max_bounces=15): #[TODO] imple func, and make dispatch to this
+    # this is similar to `DOM.reflect` but will exactly handle the particle tunnelling
+    # for large step size which `DOM.reflect` completely cannot detect. 
+    # the path will be traced from start to account for this, unlike its predecesor.
     
-@dataclass #(frozen=True)
+    pass
+@dataclass
 class Mesh:
     nodes : np.ndarray # [N,dim]
     elements : np.ndarray # [M, tri=2/3/4]
@@ -114,6 +107,7 @@ class Mesh:
                                 weights=np.repeat(self.area / 3.0, 3), 
                                 minlength=self.N)
         assert np.all(self.mass > 0)
+        # [TODO] try using scipy.sparse.diags instead of np.diag.
         self.M_lump, self.M_lump_inv = np.diag(self.mass), np.diag(1. / self.mass)
         
         self.tri = matplotlib.tri.Triangulation(*self.nodes.T, self.elements)
@@ -196,7 +190,20 @@ class Mesh:
         np.add.at(raty, self.Dy.row, ys)
         return np.column_stack([ratx, raty]) # [N, 2]
 
-@dataclass 
+# @dataclass
+# class Stencil:
+    
+#     x0 : np.ndarray 
+#     x1 : np.ndarray 
+#     w : np.ndarray # weights (log): quadrature * barycentric weight
+#     mass : np.ndarray 
+#     pent : int = 0
+
+#     @classmethod
+#     def build(cls, mesh: Mesh, b, dt, kappa):
+#         pass
+
+@dataclass ## Create core class instead 
 class SLStenc0: # 3-branches SL-stencil for approximate ops U
     
     x0 : np.ndarray 
@@ -281,89 +288,6 @@ class Ekern: # interaction kernel E (implement entire drift b(t,x,rho_t))
         r = np.clip(r, -20, 20)
         return logW, b, r
 
-
-def solve_mfrsb(mesh: Mesh, E: Ekern, SL : SLStenc0, c: Config, 
-                marginals_func: Callable, logger: Experiment): 
-    '''Main Solver'''
-    np.random.seed(c.seed)
-    assert c.splitting in ["strang", "lie"] 
-    
-    dt = c.T/c.Nt 
-    mu0, muT = marginals_func(mesh.nodes, mesh.mass) 
-    lgmu0, lgmuT = np.log(mu0), np.log(muT) 
-    rho = np.full((c.Nt+1, mesh.N), 1/mesh.mass.sum()) # uniform
-    f, h = np.zeros_like(rho), np.zeros_like(rho) # f=log(phi), g=log(phi_hat)
-    
-
-    
-    start_time = time.perf_counter()
-    prev_diff = None 
-    
-    for n in range(1, c.N_iter+1):
-        
-        inner_time_start = time.perf_counter()
-        
-        logW, b, r, = E.field(mesh, rho, f, c.kappa)
-        ops: list[SLStenc0] = [SL.build(mesh, b[k], dt, c.kappa)
-                                    for k in range(c.Nt)]
-        
-        fn, hn = np.empty_like(f), np.empty_like(h) # varphi and varphi_hat (log)
-        fn[-1] = f[-1]
-
-        for k in range(c.Nt-1, -1,-1):
-            if c.splitting == 'strang':
-                fn[k] = .5*dt*r[k] + \
-                        ops[k].feyn_bwd(fn[k+1] + \
-                        .5*dt*r[k+1])
-            elif c.splitting == 'lie':
-                fn[k] = ops[k].feyn_bwd(fn[k+1] + dt*r[k+1]) 
-                
-        hn[0] = lgmu0 - logW[0] - fn[0]
-        
-        for k, op in enumerate(ops):
-            if c.splitting == 'strang':
-                hn[k+1] = .5*dt*r[k+1] + \
-                        op.feyn_fwd(hn[k] + \
-                        .5*dt*r[k])
-            elif c.splitting == 'lie':
-                hn[k+1]= dt * r[k+1] + op.feyn_fwd(hn[k])
-                
-        fn[-1] = lgmuT - logW[-1] - hn[-1]
-        
-        logrho = logW + fn + hn
-        logz =  logsumexp(logrho + np.log(mesh.mass)[None, :], axis=1, keepdims=True)
-        rho_half = np.exp(logrho - logz)
-        rho_next = (1. - c.theta) * rho + c.theta * rho_half
-        
-        #### DONE ###
-        cpu_iter = time.perf_counter() - inner_time_start
-        
-        rho_diff = logger.log_step(n, rho_next, rho, prev_diff, mu0, muT, mesh, ops, 
-                                b, logz, dt, c.kappa, cpu_iter, compute_w2_marginal)
-        prev_diff = rho_diff 
-        rho, f, h = rho_next, fn, hn
-        
-        if rho_diff <= c.tol: break ### converged! 
-
-    # finalize
-    for k in range(c.Nt-1, -1, -1):
-        f[k] = .5 * dt * r[k] + ops[k].feyn_bwd(
-            f[k+1] +.5 * dt * r[k+1]
-        )
-    
-    # alpha^* = 2*kappa*nabla(varphi) where varphi = nabla(phi) / phi
-    optimal_alpha = np.sqrt(2. * c.kappa) * np.array(
-       [ mesh.compute_relative_grad(f[k]) for k in range(c.Nt+1)]
-    )
-    optimal_alpha[-1] = optimal_alpha[-2].copy()
-    
-    final_energy = free_energy(mesh, E, rho, c.kappa)
-    
-    endtime = time.perf_counter() - start_time
-    
-    return {'rho': rho, 'f': f, 'h': h, 'b': b, 'mu0' : mu0, 'muT': muT,
-            'opt_alpha': optimal_alpha, 'dt': dt, 'T': c.T, 
-            'kappa': c.kappa, 'free_energy' : final_energy}
 
 ############################ additional subclass DOM ############################
 
